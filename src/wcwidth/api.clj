@@ -71,13 +71,17 @@ This is useful because Clojure/Java string literals only support UTF-16 escape s
       :else                 0)))
 
 (defn null?
-  "Is code-point (a character or integer) a null character?"
+  "Is code-point† a null character?
+
+†a character or integer, but note that Java/Clojure characters are limited to the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
   (when code-point
     (= 0x0000 (int code-point))))
 
 (defn non-printing?
-  "Is code-point (a character or integer) a non-printing character?"
+  "Is code-point† a non-printing character?
+
+†a character or integer, but note that Java/Clojure characters are limited to the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -86,13 +90,17 @@ This is useful because Clojure/Java string literals only support UTF-16 escape s
                (<  cp 0x00A0))))))
 
 (defn combining?
-  "Is code-point (a character or integer) a combining character?"
+  "Is code-point† a combining character?
+
+†a character or integer, but note that Java/Clojure characters are limited to the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
   (when code-point
     (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] compare-combining-char) 0)))
 
 (defn wide?
-  "Is code-point (a character or integer) in the East Asian Wide (W) or East Asian Full-width (F) category as defined in Unicode Technical Report #11 (and subsequent revisions)?"
+  "Is code-point† in the East Asian Wide (W) or East Asian Full-width (F) category as defined in Unicode Technical Report #11 (and subsequent revisions)?
+
+†a character or integer, but note that Java/Clojure characters are limited to the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -113,7 +121,9 @@ This is useful because Clojure/Java string literals only support UTF-16 escape s
                (and (>= cp 0x30000) (<= cp 0x3FFFD)))))))  ; CJK Symbols and Punctuation
 
 (defn wcwidth
-  "Returns the number of columns needed to represent the code-point. If code-point is a printable character, the value is at least 0. If code-point is a null character, the value is 0. Otherwise, -1 is returned."
+  "Returns the number of columns needed to represent the code-point†. If code-point is a printable character, the value is at least 0. If code-point is a null character, the value is 0. Otherwise, -1 is returned.
+
+†a character or integer, but note that Java/Clojure characters are limited to the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -145,7 +155,7 @@ This is useful because Clojure/Java string literals only support UTF-16 escape s
         (reduce + ws)))))
 
 (defn wcswidth2
-  "Returns the number of columns needed to represent String s, ignoring nonprintable characters (note: this variant is not provided by POSIX, but is arguably more useful on the JVM given how it handles such characters)."
+  "Returns the number of columns needed to represent String s, ignoring nonprintable characters (note: this variant is not provided by POSIX, but is arguably more useful on the JVM)."
   [s]
   (when s
     (reduce + (remove #(<= % 0) (widths s)))))
