@@ -22,7 +22,7 @@
 (defn codepoint-to-string
   "Converts any Unicode codepoint to a String.
 
-This is useful because Clojure/Java string literals only support UTF-16 escape sequences, which involves manual construction of all supplementary code points."
+This is useful because Clojure/Java string literals only support UTF-16 escape sequences for code points, which involves manual conversion of all supplementary code points into pairs of escapes."
   [^Integer code-point]
   (when code-point
     (s/join (java.lang.Character/toChars code-point))))
