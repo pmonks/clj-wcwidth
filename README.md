@@ -51,11 +51,13 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/wcwidth 0x1F921)  ; 🤡
 ; ==> 2   (double width)
 
-(wcw/wcswidth "hello, 🤡")
+(wcw/wcswidth "hello, world")
 ; ==> 12
+(wcw/wcswidth "hello, 🤡")
+; ==> 9
+
 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
 ; ==> -1  (due to non-printing character)
-
 (wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
 ; ==> 12  (showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, wcswidth2 behaviour)
 ```
