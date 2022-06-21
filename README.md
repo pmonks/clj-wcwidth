@@ -1,36 +1,38 @@
 | | | |
 |---:|:---:|:---:|
-| [**main**](https://github.com/pmonks/wcwidth/tree/main) | [![CI](https://github.com/pmonks/wcwidth/workflows/CI/badge.svg?branch=main)](https://github.com/pmonks/wcwidth/actions?query=workflow%3ACI+branch%3Amain) | [![Dependencies](https://github.com/pmonks/wcwidth/workflows/dependencies/badge.svg?branch=main)](https://github.com/pmonks/wcwidth/actions?query=workflow%3Adependencies+branch%3Amain) |
-| [**dev**](https://github.com/pmonks/wcwidth/tree/dev) | [![CI](https://github.com/pmonks/wcwidth/workflows/CI/badge.svg?branch=dev)](https://github.com/pmonks/wcwidth/actions?query=workflow%3ACI+branch%3Adev) | [![Dependencies](https://github.com/pmonks/wcwidth/workflows/dependencies/badge.svg?branch=dev)](https://github.com/pmonks/wcwidth/actions?query=workflow%3Adependencies+branch%3Adev) |
+| [**main**](https://github.com/pmonks/clj-wcwidth/tree/main) | [![CI](https://github.com/pmonks/clj-wcwidth/workflows/CI/badge.svg?branch=main)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3ACI+branch%3Amain) | [![Dependencies](https://github.com/pmonks/clj-wcwidth/workflows/dependencies/badge.svg?branch=main)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3Adependencies+branch%3Amain) |
+| [**dev**](https://github.com/pmonks/clj-wcwidth/tree/dev) | [![CI](https://github.com/pmonks/clj-wcwidth/workflows/CI/badge.svg?branch=dev)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3ACI+branch%3Adev) | [![Dependencies](https://github.com/pmonks/clj-wcwidth/workflows/dependencies/badge.svg?branch=dev)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3Adependencies+branch%3Adev) |
 
-[![Latest Version](https://img.shields.io/clojars/v/com.github.pmonks/wcwidth)](https://clojars.org/com.github.pmonks/wcwidth/) [![Open Issues](https://img.shields.io/github/issues/pmonks/wcwidth.svg)](https://github.com/pmonks/wcwidth/issues) [![License](https://img.shields.io/github/license/pmonks/wcwidth.svg)](https://github.com/pmonks/wcwidth/blob/main/LICENSE)
+[![Latest Version](https://img.shields.io/clojars/v/com.github.pmonks/clj-wcwidth)](https://clojars.org/com.github.pmonks/clj-wcwidth/) [![Open Issues](https://img.shields.io/github/issues/pmonks/clj-wcwidth.svg)](https://github.com/pmonks/clj-wcwidth/issues) [![License](https://img.shields.io/github/license/pmonks/clj-wcwidth.svg)](https://github.com/pmonks/clj-wcwidth/blob/main/LICENSE)
 
-# wcwidth
+# clj-wcwidth
 
-Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages/man3/wcwidth.3.html) and [`wcswidth`](https://man7.org/linux/man-pages/man3/wcswidth.3.html) POSIX functions.
+Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages/man3/wcwidth.3.html) and [`wcswidth`](https://man7.org/linux/man-pages/man3/wcswidth.3.html) POSIX functions (plus some other useful Unicode functions).
 
 ## Why?
 
 When printing Unicode characters to a fixed-width display device (e.g. a terminal), every Unicode code point has a well-defined "column width".  This was originally standardised in [Unicode Technical Report #11](https://unicode.org/reports/tr11-5/), and implemented as the POSIX functions `wcwidth` and `wcswidth` soon after.
 
-Java doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.   This library provides a pure, zero-dependency Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
+Java doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
+
+This library provides a pure, zero-dependency Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
 
 ## Installation
 
-`wcwidth` is available as a Maven artifact from [Clojars](https://clojars.org/com.github.pmonks/wcwidth).
+`clj-wcwidth` is available as a Maven artifact from [Clojars](https://clojars.org/com.github.pmonks/clj-wcwidth).
 
 ### Trying it Out
 
 #### Clojure CLI
 
 ```shell
-$ clojure -Sdeps '{:deps {com.github.pmonks/wcwidth {:mvn/version "#.#.#"}}}'  # Where #.#.# is replaced with an actual version number (see badge above)
+$ clojure -Sdeps '{:deps {com.github.pmonks/clj-wcwidth {:mvn/version "#.#.#"}}}'  # Where #.#.# is replaced with an actual version number (see badge above)
 ```
 
 #### Leiningen
 
 ```shell
-$ lein try com.github.pmonks/wcwidth
+$ lein try com.github.pmonks/clj-wcwidth
 ```
 
 #### Simple REPL Session
@@ -39,16 +41,25 @@ $ lein try com.github.pmonks/wcwidth
 (require '[wcwidth.api :as wcw] :reload-all)
 
 (wcw/wcwidth \A)
+; ==> 1
 (wcw/wcwidth \©)
+; ==> 1
+(wcw/wcwidth 0x0000)   ; ASCII NUL
+; ==> 0   (nul)
 (wcw/wcwidth 0x001B)   ; ASCII ESC
+; ==> -1  (non-printing)
 (wcw/wcwidth 0x1F921)  ; 🤡
+; ==> 2   (double width)
 
-(wcw/wcwidth "hello, world")
-(wcw/wcwidth "hello, 🤡")
-(wcw/wcwidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+(wcw/wcswidth "hello, world")
+; ==> 12
+(wcw/wcswidth "hello, 🤡")
+; ==> 9
 
-; Showing the difference between the POSIX wcswidth behaviour and the (more useful for Clojure, but non-POSIX) wcswidth2 behaviour
-(wcw/wcwidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+(wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+; ==> -1  (due to non-printing character)
+(wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+; ==> 12  (showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, wcswidth2 behaviour)
 ```
 
 ## Usage
@@ -70,15 +81,15 @@ Require it in your application:
 
 ### API Documentation
 
-[API documentation is available here](https://pmonks.github.io/wcwidth/).  [The unit tests](https://github.com/pmonks/wcwidth/blob/main/test/wcwidth/api_test.clj) provide comprehensive usage examples.
+[API documentation is available here](https://pmonks.github.io/clj-wcwidth/).  [The unit tests](https://github.com/pmonks/clj-wcwidth/blob/main/test/wcwidth/api_test.clj) provide comprehensive usage examples.
 
 ## Contributor Information
 
-[Contributing Guidelines](https://github.com/pmonks/wcwidth/blob/main/.github/CONTRIBUTING.md)
+[Contributing Guidelines](https://github.com/pmonks/clj-wcwidth/blob/main/.github/CONTRIBUTING.md)
 
-[Bug Tracker](https://github.com/pmonks/wcwidth/issues)
+[Bug Tracker](https://github.com/pmonks/clj-wcwidth/issues)
 
-[Code of Conduct](https://github.com/pmonks/wcwidth/blob/main/.github/CODE_OF_CONDUCT.md)
+[Code of Conduct](https://github.com/pmonks/clj-wcwidth/blob/main/.github/CODE_OF_CONDUCT.md)
 
 ### Developer Workflow
 

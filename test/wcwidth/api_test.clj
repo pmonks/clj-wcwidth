@@ -18,7 +18,6 @@
 
 (ns wcwidth.api-test
   (:require [clojure.test   :refer [deftest testing is]]
-            [clojure.string :as s]
             [wcwidth.api    :as wcw]))
 
 (def code-point-clown-emoji          0x1F921)   ; 🤡

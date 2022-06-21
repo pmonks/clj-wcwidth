@@ -18,6 +18,7 @@
 
 {:aliases
    {:build
-      {:deps       {io.github.seancorfield/build-clj {:git/tag "v0.8.2" :git/sha "0ffdb4c"}
-                    com.github.pmonks/pbr            {:mvn/version "RELEASE"}}
-       :ns-default pbr.build}}}
+      {:deps        {io.github.seancorfield/build-clj {:git/tag "v0.8.2" :git/sha "0ffdb4c"}
+                     com.github.pmonks/pbr            {:mvn/version "RELEASE"}}
+       :ns-default  pbr.build
+       :extra-paths ["src"]}}}  ; To appease codox...
