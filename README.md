@@ -1,9 +1,9 @@
 | | | |
 |---:|:---:|:---:|
-| [**main**](https://github.com/pmonks/wcwidth/tree/main) | [![CI](https://github.com/pmonks/wcwidth/workflows/CI/badge.svg?branch=main)](https://github.com/pmonks/wcwidth/actions?query=workflow%3ACI+branch%3Amain) | [![Dependencies](https://github.com/pmonks/wcwidth/workflows/dependencies/badge.svg?branch=main)](https://github.com/pmonks/wcwidth/actions?query=workflow%3Adependencies+branch%3Amain) |
-| [**dev**](https://github.com/pmonks/wcwidth/tree/dev) | [![CI](https://github.com/pmonks/wcwidth/workflows/CI/badge.svg?branch=dev)](https://github.com/pmonks/wcwidth/actions?query=workflow%3ACI+branch%3Adev) | [![Dependencies](https://github.com/pmonks/wcwidth/workflows/dependencies/badge.svg?branch=dev)](https://github.com/pmonks/wcwidth/actions?query=workflow%3Adependencies+branch%3Adev) |
+| [**main**](https://github.com/pmonks/clj-wcwidth/tree/main) | [![CI](https://github.com/pmonks/clj-wcwidth/workflows/CI/badge.svg?branch=main)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3ACI+branch%3Amain) | [![Dependencies](https://github.com/pmonks/clj-wcwidth/workflows/dependencies/badge.svg?branch=main)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3Adependencies+branch%3Amain) |
+| [**dev**](https://github.com/pmonks/clj-wcwidth/tree/dev) | [![CI](https://github.com/pmonks/clj-wcwidth/workflows/CI/badge.svg?branch=dev)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3ACI+branch%3Adev) | [![Dependencies](https://github.com/pmonks/clj-wcwidth/workflows/dependencies/badge.svg?branch=dev)](https://github.com/pmonks/clj-wcwidth/actions?query=workflow%3Adependencies+branch%3Adev) |
 
-[![Latest Version](https://img.shields.io/clojars/v/com.github.pmonks/wcwidth)](https://clojars.org/com.github.pmonks/wcwidth/) [![Open Issues](https://img.shields.io/github/issues/pmonks/wcwidth.svg)](https://github.com/pmonks/wcwidth/issues) [![License](https://img.shields.io/github/license/pmonks/wcwidth.svg)](https://github.com/pmonks/wcwidth/blob/main/LICENSE)
+[![Latest Version](https://img.shields.io/clojars/v/com.github.pmonks/wcwidth)](https://clojars.org/com.github.pmonks/wcwidth/) [![Open Issues](https://img.shields.io/github/issues/pmonks/wcwidth.svg)](https://github.com/pmonks/clj-wcwidth/issues) [![License](https://img.shields.io/github/license/pmonks/wcwidth.svg)](https://github.com/pmonks/clj-wcwidth/blob/main/LICENSE)
 
 # wcwidth
 
@@ -70,15 +70,15 @@ Require it in your application:
 
 ### API Documentation
 
-[API documentation is available here](https://pmonks.github.io/wcwidth/).  [The unit tests](https://github.com/pmonks/wcwidth/blob/main/test/wcwidth/api_test.clj) provide comprehensive usage examples.
+[API documentation is available here](https://pmonks.github.io/clj-wcwidth/).  [The unit tests](https://github.com/pmonks/clj-wcwidth/blob/main/test/wcwidth/api_test.clj) provide comprehensive usage examples.
 
 ## Contributor Information
 
-[Contributing Guidelines](https://github.com/pmonks/wcwidth/blob/main/.github/CONTRIBUTING.md)
+[Contributing Guidelines](https://github.com/pmonks/clj-wcwidth/blob/main/.github/CONTRIBUTING.md)
 
-[Bug Tracker](https://github.com/pmonks/wcwidth/issues)
+[Bug Tracker](https://github.com/pmonks/clj-wcwidth/issues)
 
-[Code of Conduct](https://github.com/pmonks/wcwidth/blob/main/.github/CODE_OF_CONDUCT.md)
+[Code of Conduct](https://github.com/pmonks/clj-wcwidth/blob/main/.github/CODE_OF_CONDUCT.md)
 
 ### Developer Workflow
 
