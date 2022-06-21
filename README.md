@@ -7,7 +7,7 @@
 
 # wcwidth
 
-Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages/man3/wcwidth.3.html) and [`wcswidth`](https://man7.org/linux/man-pages/man3/wcswidth.3.html) POSIX functions.
+Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages/man3/wcwidth.3.html) and [`wcswidth`](https://man7.org/linux/man-pages/man3/wcswidth.3.html) POSIX functions (plus some other useful Unicode functions).
 
 ## Why?
 
@@ -39,16 +39,25 @@ $ lein try com.github.pmonks/wcwidth
 (require '[wcwidth.api :as wcw] :reload-all)
 
 (wcw/wcwidth \A)
+; ==> 1
 (wcw/wcwidth \©)
+; ==> 1
+(wcw/wcwidth 0x0000)   ; ASCII NUL
+; ==> 0   (nul)
 (wcw/wcwidth 0x001B)   ; ASCII ESC
+; ==> -1  (non-printing)
 (wcw/wcwidth 0x1F921)  ; 🤡
+; ==> 2   (double width)
 
-(wcw/wcwidth "hello, world")
-(wcw/wcwidth "hello, 🤡")
-(wcw/wcwidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
 
-; Showing the difference between the POSIX wcswidth behaviour and the (more useful for Clojure, but non-POSIX) wcswidth2 behaviour
-(wcw/wcwidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+  
+(wcw/wcswidth "hello, 🤡")
+; ==> 12
+(wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+; ==> -1  (due to non-printing character)
+
+(wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
+; ==> 12  (showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, wcswidth2 behaviour)
 ```
 
 ## Usage
