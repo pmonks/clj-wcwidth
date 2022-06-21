@@ -51,16 +51,16 @@
     (is (= 1 (wcw/wcwidth \6)))
     (is (= 1 (wcw/wcwidth \A))))
 
-  (testing "Unicode - negative width"
+  (testing "Unicode - non-printing"
     (is (= -1 (wcw/wcwidth 0x0008)))    ; BS
     (is (= -1 (wcw/wcwidth 0x001B)))    ; ESC
     (is (= -1 (wcw/wcwidth 0x008A)))
     (is (= -1 (wcw/wcwidth 0x0099))))
 
-  ; These tests primarily exercise the binary search of the combining characters
+  ; These tests primarily exercise the binary search of the combining characters structure
   (testing "Unicode - zero width"
-    (is (zero? (wcw/wcwidth 0x0F35)))   ; Very close to middle of combinging characters
-    (is (zero? (wcw/wcwidth 0x0F37)))   ; Very close to middle of combinging characters
+    (is (zero? (wcw/wcwidth 0x0F35)))   ; Very close to middle of combining characters
+    (is (zero? (wcw/wcwidth 0x0F37)))   ; Very close to middle of combining characters
     (is (zero? (wcw/wcwidth 0x0311)))   ; Lowest block of combining characters
     (is (zero? (wcw/wcwidth 0xE0100)))  ; Highest block of combining characters
     (is (zero? (wcw/wcwidth 0x0B01)))   ; Random entries in combining characters from here on
@@ -81,6 +81,9 @@
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth "foo")))
     (is (= 12 (wcw/wcswidth "hello, world")))
+    (is (= 28 (wcw/wcswidth "Copyright © Peter Monks 2022")))
+    (is (= 10 (wcw/wcswidth "पीटर मोंक्सो")))
+    (is (= 11 (wcw/wcswidth "彼得·蒙克斯")))
     (is (=  9 (wcw/wcswidth (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
     (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
 
@@ -88,5 +91,8 @@
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth2 "foo")))
     (is (= 12 (wcw/wcswidth2 "hello, world")))
+    (is (= 28 (wcw/wcswidth2 "Copyright © Peter Monks 2022")))
+    (is (= 10 (wcw/wcswidth2 "पीटर मोंक्सो")))
+    (is (= 11 (wcw/wcswidth2 "彼得·蒙克斯")))
     (is (=  9 (wcw/wcswidth2 (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
     (is (= 12 (wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
