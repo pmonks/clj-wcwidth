@@ -19,20 +19,20 @@ This library provides a pure, zero-dependency Clojure implementation of the rule
 
 ## Installation
 
-`wcwidth` is available as a Maven artifact from [Clojars](https://clojars.org/com.github.pmonks/wcwidth).
+`clj-wcwidth` is available as a Maven artifact from [Clojars](https://clojars.org/com.github.pmonks/clj-wcwidth).
 
 ### Trying it Out
 
 #### Clojure CLI
 
 ```shell
-$ clojure -Sdeps '{:deps {com.github.pmonks/wcwidth {:mvn/version "#.#.#"}}}'  # Where #.#.# is replaced with an actual version number (see badge above)
+$ clojure -Sdeps '{:deps {com.github.pmonks/clj-wcwidth {:mvn/version "#.#.#"}}}'  # Where #.#.# is replaced with an actual version number (see badge above)
 ```
 
 #### Leiningen
 
 ```shell
-$ lein try com.github.pmonks/wcwidth
+$ lein try com.github.pmonks/clj-wcwidth
 ```
 
 #### Simple REPL Session
