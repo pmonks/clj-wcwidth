@@ -51,8 +51,6 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/wcwidth 0x1F921)  ; 🤡
 ; ==> 2   (double width)
 
-
-  
 (wcw/wcswidth "hello, 🤡")
 ; ==> 12
 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
