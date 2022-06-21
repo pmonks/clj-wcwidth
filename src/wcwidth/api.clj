@@ -16,7 +16,16 @@
 ; SPDX-License-Identifier: Apache-2.0
 ;
 
-(ns wcwidth.api)
+(ns wcwidth.api
+  (:require [clojure.string :as s]))
+
+(defn codepoint-to-string
+  "Converts any Unicode codepoint to a String.
+
+This is useful because Clojure/Java string literals only support UTF-16 escape sequences, which involves manual construction of all supplementary code points."
+  [^Integer code-point]
+  (when code-point
+    (s/join (java.lang.Character/toChars code-point))))
 
 ; Copied directly from https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java#L80 as of 2021-11-14
 ; That code is BSD-3-Clause.
@@ -61,13 +70,13 @@
       (> code-point upper)  (*  1 multiplier)
       :else                 0)))
 
-(defn null-char?
+(defn null?
   "Is code-point (a character or integer) a null character?"
   [code-point]
   (when code-point
     (= 0x0000 (int code-point))))
 
-(defn non-printing-char?
+(defn non-printing?
   "Is code-point (a character or integer) a non-printing character?"
   [code-point]
   (when code-point
@@ -76,13 +85,13 @@
           (and (>= cp 0x007F)
                (<  cp 0x00A0))))))
 
-(defn combining-char?
+(defn combining?
   "Is code-point (a character or integer) a combining character?"
   [code-point]
   (when code-point
     (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] compare-combining-char) 0)))
 
-(defn wide-char?
+(defn wide?
   "Is code-point (a character or integer) in the East Asian Wide (W) or East Asian Full-width (F) category as defined in Unicode Technical Report #11 (and subsequent revisions)?"
   [code-point]
   (when code-point
@@ -109,16 +118,22 @@
   (when code-point
     (let [cp (int code-point)]
       (cond
-        (null-char? cp)          0
-        (non-printing-char? cp) -1
-        (combining-char? cp)     0
-        (wide-char? cp)          2
-        :else                    1))))
+        (null? cp)          0
+        (non-printing? cp) -1
+        (combining? cp)     0
+        (wide? cp)          2
+        :else               1))))
+
+(defn code-points
+  "Returns all of the Unicode code points in s, as a sequence of integers."
+  [^String s]
+  (when s
+    (seq (.toArray (.codePoints s)))))
 
 (defn- widths
-  "Returns a lazy sequence of all of the widths of the Characters in String s."
-  [^String s]
-  (map-indexed (fn [i _] (wcwidth (.codePointAt s i))) s))
+  "Returns a sequence of all of the widths of the Characters in String s."
+  [s]
+  (map wcwidth (code-points s)))
 
 (defn wcswidth
   "Returns the number of columns needed to represent String s. If a nonprintable character occurs among these characters, -1 is returned."

@@ -17,8 +17,23 @@
 ;
 
 (ns wcwidth.api-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [wcwidth.api  :as wcw]))
+  (:require [clojure.test   :refer [deftest testing is]]
+            [clojure.string :as s]
+            [wcwidth.api    :as wcw]))
+
+(def code-point-clown-emoji          0x1F921)   ; 🤡
+(def code-point-combining-example    0x1D177)
+(def code-point-non-printing-example 0x0094)
+
+(deftest test-codepoint-to-string
+  (testing "ASCII codepoints"
+    (is (=  " " (wcw/codepoint-to-string 0x0020)))    ; space
+    (is (=  "#" (wcw/codepoint-to-string 0x0023)))    ; #
+    (is (=  "6" (wcw/codepoint-to-string 0x0036)))    ; 6
+    (is (=  "A" (wcw/codepoint-to-string 0x0041))))   ; A
+
+  (testing "Unicode codepoints"
+    (is (= "🤡" (wcw/codepoint-to-string code-point-clown-emoji)))))
 
 (deftest test-wcwidth
   (testing "ASCII codes"
@@ -57,24 +72,21 @@
 
   (testing "Unicode - single width"
     (is (= 1 (wcw/wcwidth \©)))
-    (is (= 1 (wcw/wcwidth \█)))
-    )
+    (is (= 1 (wcw/wcwidth \█))))
 
   (testing "Unicode - double width")
-    (is (= 2 (wcw/wcwidth 0x1F921)))   ; 🤡
-    )
+    (is (= 2 (wcw/wcwidth code-point-clown-emoji))))
 
 (deftest test-wcswidth
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth "foo")))
     (is (= 12 (wcw/wcswidth "hello, world")))
-    (is (=  9 (wcw/wcswidth "hello, 🤡")))
-    (is (= -1 (wcw/wcswidth (str "hello, world" (java.lang.Character/toChars 0x1D177)))))))   ; combining char
+    (is (=  9 (wcw/wcswidth (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
+    (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
 
 (deftest test-wcswidth2
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth2 "foo")))
     (is (= 12 (wcw/wcswidth2 "hello, world")))
-    (is (=  9 (wcw/wcswidth2 "hello, 🤡")))
-    (is (= 12 (wcw/wcswidth2 (str "hello, world" (java.lang.Character/toChars 0x1D177)))))))   ; combining char
-
+    (is (=  9 (wcw/wcswidth2 (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
+    (is (= 12 (wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))

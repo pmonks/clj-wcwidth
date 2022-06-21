@@ -47,9 +47,10 @@ $ lein try com.github.pmonks/wcwidth
 
 (wcw/wcwidth "hello, world")
 (wcw/wcwidth "hello, 🤡")
-(wcw/wcwidth (str "hello, world" (java.lang.Character/toChars 0x1D177)))   ; combining char
+(wcw/wcwidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
 
-(wcw/wcwidth2 (str "hello, world" (java.lang.Character/toChars 0x1D177)))   ; combining char
+; Showing the difference between the POSIX wcswidth behaviour and the (more useful for Clojure, but non-POSIX) wcswidth2 behaviour
+(wcw/wcwidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
 ```
 
 ## Usage
