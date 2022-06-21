@@ -98,7 +98,7 @@ This is useful because Clojure/Java string literals only support UTF-16 escape s
     (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] compare-combining-char) 0)))
 
 (defn wide?
-  "Is code-point† in the East Asian Wide (W) or East Asian Full-width (F) category as defined in Unicode Technical Report #11 (and subsequent revisions)?
+  "Is code-point† in the East Asian Wide (W) or East Asian Full-width (F) category?
 
 †a character or integer, but note that Java/Clojure characters are limited to the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
