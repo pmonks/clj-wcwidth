@@ -67,7 +67,7 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/display-width (str "hello, world" (wcw/codepoint-to-string 0x0084)))
 ; ==> 12
 
-; Also show why clojure.count/count gives incorrect results when non-printing code points are
+; Also show why clojure.core/count gives incorrect results when non-printing code points are
 ; present:
 (count (str "hello, world" (wcw/codepoint-to-string 0x0084)))
 ; ==> 13
