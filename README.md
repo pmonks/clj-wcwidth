@@ -17,6 +17,10 @@ Java doesn't provide these functions however, so applications that need to know 
 
 This library provides a pure, zero-dependency Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
 
+## Why not `count`?
+
+When supplied with a string, [`count`](https://clojuredocs.org/clojure.core/count) counts the number of Java `char`s in that string, which (due to a historical oddity of the JVM) is not necessarily the same thing as a Unicode code point (Java `char`s are UTF-16 "code units", and Unicode code points in the supplementary planes require two such code units and therefore get counted as 2 `char`s on the JVM).  It also doesn't take non-printing and zero-width characters into account.
+
 ## Installation
 
 `clj-wcwidth` is available as a Maven artifact from [Clojars](https://clojars.org/com.github.pmonks/clj-wcwidth).
@@ -44,22 +48,33 @@ $ lein try com.github.pmonks/clj-wcwidth
 ; ==> 1
 (wcw/wcwidth \©)
 ; ==> 1
-(wcw/wcwidth 0x0000)   ; ASCII NUL
+(wcw/wcwidth 0x0000)   ; ASCII NUL (zero width)
 ; ==> 0   (nul)
-(wcw/wcwidth 0x001B)   ; ASCII ESC
-; ==> -1  (non-printing)
-(wcw/wcwidth 0x1F921)  ; 🤡
-; ==> 2   (double width)
+(wcw/wcwidth 0x001B)   ; ASCII ESC (non printing)
+; ==> -1
+(wcw/wcwidth 0x1F921)  ; 🤡 (double width)
+; ==> 2
 
-(wcw/wcswidth "hello, world")
+(wcw/display-width "hello, world")
 ; ==> 12
-(wcw/wcswidth "hello, 🤡")
+(wcw/display-width "hello, 🤡")
 ; ==> 9
 
-(wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
-; ==> -1  (due to non-printing character)
-(wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing char
-; ==> 12  (showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, wcswidth2 behaviour)
+; Showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, display-width behaviour:
+(wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing code point
+; ==> -1
+(wcw/display-width (str "hello, world" (wcw/codepoint-to-string 0x0084)))
+; ==> 12
+
+; Also show why clojure.count/count gives incorrect results when non-printing code points are present:
+(count (str "hello, world" (wcw/codepoint-to-string 0x0084)))
+; ==> 13
+
+; And then show how a single width code point in a supplementary plane gets miscounted by count:
+(wcw/display-width (wcw/codepoint-to-string 0x10400))  ; 𐐀
+; ==> 1
+(count (wcw/codepoint-to-string 0x10400))
+; ==> 2
 ```
 
 ## Usage
