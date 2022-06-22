@@ -25,6 +25,9 @@
 (def code-point-non-printing-example 0x0094)
 
 (deftest test-codepoint-to-string
+  (testing "nil"
+    (is (nil? (wcw/codepoint-to-string nil))))
+
   (testing "ASCII codepoints"
     (is (=  " " (wcw/codepoint-to-string 0x0020)))    ; space
     (is (=  "#" (wcw/codepoint-to-string 0x0023)))    ; #
@@ -35,6 +38,9 @@
     (is (= "🤡" (wcw/codepoint-to-string code-point-clown-emoji)))))
 
 (deftest test-wcwidth
+  (testing "nil"
+    (is (nil? (wcw/wcwidth nil))))
+
   (testing "ASCII codes"
     (is (zero?  (wcw/wcwidth 0x0000)))    ; NUL
     (is (= -1   (wcw/wcwidth 0x007F)))    ; DEL
@@ -78,6 +84,10 @@
     (is (= 2 (wcw/wcwidth code-point-clown-emoji))))
 
 (deftest test-wcswidth
+  (testing "nil and empty"
+    (is (nil? (wcw/wcswidth nil)))
+    (is (= 0  (wcw/wcswidth ""))))
+
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth "foo")))
     (is (= 12 (wcw/wcswidth "hello, world"))))
@@ -92,6 +102,10 @@
     (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
 
 (deftest test-display-width
+  (testing "nil and empty"
+    (is (nil? (wcw/display-width nil)))
+    (is (= 0  (wcw/display-width ""))))
+
   (testing "ASCII-only strings"
     (is (=  3 (wcw/display-width "foo")))
     (is (= 12 (wcw/display-width "hello, world"))))
