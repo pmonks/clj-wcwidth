@@ -19,7 +19,7 @@ This library provides a pure, zero-dependency Clojure implementation of the rule
 
 ## Why not `count`?
 
-When supplied with a string, [`count`](https://clojuredocs.org/clojure.core/count) counts the number of Java `char`s in that string, which (due to a historical oddity of the JVM) is not necessarily the same thing as a Unicode code point (Java `char`s are UTF-16 "code units", and Unicode code points in the supplementary planes require two such code units and therefore get counted as 2 `char`s on the JVM).  It also doesn't take non-printing and zero-width characters into account.
+When supplied with a string, [`count`](https://clojuredocs.org/clojure.core/count) counts the number of Java `char`s in that string, which (due to a historical oddity of the JVM) is not necessarily the same thing as a Unicode code point (Java `char`s are UTF-16 "code units", and Unicode code points in the supplementary planes require two such code units and therefore get counted as 2 `char`s on the JVM).  It also doesn't take non-printing and zero-width characters into account (more accurately, it counts them when it shouldn't).
 
 ## Installation
 
