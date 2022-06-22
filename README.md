@@ -77,8 +77,15 @@ $ lein try com.github.pmonks/clj-wcwidth
 (let [example-string (wcw/codepoint-to-string 0x10400)]  ; 𐐀
   (wcw/display-width example-string)
   ; ==> 1
-  (count  example-string))
+  (count example-string))
   ; ==> 2
+
+; And another example of how count doesn't return display widths:
+(let [example-string "👍👍🏻"]
+  (wcw/display-width example-string)
+  ; ==> 4
+  (count example-string))
+  ; ==> 6
 ```
 
 ## Usage
