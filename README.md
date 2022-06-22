@@ -60,13 +60,15 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/display-width "hello, 🤡")
 ; ==> 9
 
-; Showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, display-width behaviour:
+; Showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure,
+; but non-POSIX, display-width behaviour:
 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing code point
 ; ==> -1
 (wcw/display-width (str "hello, world" (wcw/codepoint-to-string 0x0084)))
 ; ==> 12
 
-; Also show why clojure.count/count gives incorrect results when non-printing code points are present:
+; Also show why clojure.count/count gives incorrect results when non-printing code points are
+; present:
 (count (str "hello, world" (wcw/codepoint-to-string 0x0084)))
 ; ==> 13
 
