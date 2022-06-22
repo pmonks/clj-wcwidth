@@ -60,21 +60,32 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/display-width "hello, 🤡")
 ; ==> 9
 
-; Showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure, but non-POSIX, display-width behaviour:
-(wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string 0x0084)))   ; non-printing code point
-; ==> -1
-(wcw/display-width (str "hello, world" (wcw/codepoint-to-string 0x0084)))
-; ==> 12
+; Showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure,
+; but non-POSIX, display-width behaviour:
+(let [example-string (str "hello, world" (wcw/codepoint-to-string 0x0084))]   ; non-printing code point
+  (wcw/display-width example-string)
+  ; ==> 12
+  (wcw/wcswidth example-string)
+  ; ==> -1
 
-; Also show why clojure.count/count gives incorrect results when non-printing code points are present:
-(count (str "hello, world" (wcw/codepoint-to-string 0x0084)))
-; ==> 13
+  ; Also show why clojure.core/count gives incorrect results when non-printing code points are
+  ; present:
+  (count example-string))
+  ; ==> 13
 
 ; And then show how a single width code point in a supplementary plane gets miscounted by count:
-(wcw/display-width (wcw/codepoint-to-string 0x10400))  ; 𐐀
-; ==> 1
-(count (wcw/codepoint-to-string 0x10400))
-; ==> 2
+(let [example-string (wcw/codepoint-to-string 0x10400)]  ; 𐐀
+  (wcw/display-width example-string)
+  ; ==> 1
+  (count example-string))
+  ; ==> 2
+
+; And another example of how count doesn't return display widths:
+(let [example-string "👍👍🏻"]
+  (wcw/display-width example-string)
+  ; ==> 4
+  (count example-string))
+  ; ==> 6
 ```
 
 ## Usage
