@@ -80,8 +80,12 @@
 (deftest test-wcswidth
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth "foo")))
-    (is (= 12 (wcw/wcswidth "hello, world")))
-    (is (= 28 (wcw/wcswidth "Copyright © Peter Monks 2022")))
+    (is (= 12 (wcw/wcswidth "hello, world"))))
+
+  (testing "Unicode - all single width"
+    (is (= 28 (wcw/wcswidth "Copyright © Peter Monks 2022"))))
+
+  (testing "Unicode - mixed widths"
     (is (= 10 (wcw/wcswidth "पीटर मोंक्सो")))
     (is (= 11 (wcw/wcswidth "彼得·蒙克斯")))
     (is (=  9 (wcw/wcswidth (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
@@ -90,8 +94,12 @@
 (deftest test-display-width
   (testing "ASCII-only strings"
     (is (=  3 (wcw/display-width "foo")))
-    (is (= 12 (wcw/display-width "hello, world")))
-    (is (= 28 (wcw/display-width "Copyright © Peter Monks 2022")))
+    (is (= 12 (wcw/display-width "hello, world"))))
+
+  (testing "Unicode - all single width"
+    (is (= 28 (wcw/display-width "Copyright © Peter Monks 2022"))))
+
+  (testing "Unicode - mixed widths"
     (is (= 10 (wcw/display-width "पीटर मोंक्सो")))
     (is (= 11 (wcw/display-width "彼得·蒙克斯")))
     (is (=  9 (wcw/display-width (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
