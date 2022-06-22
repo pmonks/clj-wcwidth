@@ -154,8 +154,8 @@ This is useful because Clojure/Java string literals only support UTF-16 escape s
         -1
         (reduce + ws)))))
 
-(defn wcswidth2
-  "Returns the number of columns needed to represent String s, ignoring nonprintable characters (note: this variant is not provided by POSIX, but is arguably more useful on the JVM)."
+(defn display-width
+  "Returns the number of columns needed to display String s, ignoring nonprintable characters. For Clojure, this is generally more useful than wcswidth."
   [s]
   (when s
     (reduce + (remove #(<= % 0) (widths s)))))

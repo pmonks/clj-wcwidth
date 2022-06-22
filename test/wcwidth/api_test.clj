@@ -71,7 +71,8 @@
 
   (testing "Unicode - single width"
     (is (= 1 (wcw/wcwidth \©)))
-    (is (= 1 (wcw/wcwidth \█))))
+    (is (= 1 (wcw/wcwidth \█)))
+    (is (= 1 (wcw/wcwidth 0x10400))))   ; 𐐀
 
   (testing "Unicode - double width")
     (is (= 2 (wcw/wcwidth code-point-clown-emoji))))
@@ -86,12 +87,12 @@
     (is (=  9 (wcw/wcswidth (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
     (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
 
-(deftest test-wcswidth2
+(deftest test-display-width
   (testing "ASCII-only strings"
-    (is (=  3 (wcw/wcswidth2 "foo")))
-    (is (= 12 (wcw/wcswidth2 "hello, world")))
-    (is (= 28 (wcw/wcswidth2 "Copyright © Peter Monks 2022")))
-    (is (= 10 (wcw/wcswidth2 "पीटर मोंक्सो")))
-    (is (= 11 (wcw/wcswidth2 "彼得·蒙克斯")))
-    (is (=  9 (wcw/wcswidth2 (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
-    (is (= 12 (wcw/wcswidth2 (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
+    (is (=  3 (wcw/display-width "foo")))
+    (is (= 12 (wcw/display-width "hello, world")))
+    (is (= 28 (wcw/display-width "Copyright © Peter Monks 2022")))
+    (is (= 10 (wcw/display-width "पीटर मोंक्सो")))
+    (is (= 11 (wcw/display-width "彼得·蒙克斯")))
+    (is (=  9 (wcw/display-width (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
+    (is (= 12 (wcw/display-width (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
