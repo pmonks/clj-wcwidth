@@ -62,7 +62,7 @@ $ lein try com.github.pmonks/clj-wcwidth
 
 ; Showing the difference between the POSIX wcswidth behaviour and the more
 ; useful for Clojure, but non-POSIX, display-width behaviour:
-(let [example-string (str "hello, world" (wcw/codepoint-to-string 0x0084))]   ; non-printing code point
+(let [example-string (str "hello, world" (wcw/code-point-to-string 0x0084))]   ; non-printing code point
   (wcw/display-width example-string)
   ; ==> 12
   (wcw/wcswidth example-string)
@@ -75,7 +75,7 @@ $ lein try com.github.pmonks/clj-wcwidth
 
 ; And then show how a single width code point in a supplementary plane gets
 ; miscounted by count:
-(let [example-string (wcw/codepoint-to-string 0x10400)]  ; 𐐀
+(let [example-string (wcw/code-point-to-string 0x10400)]  ; 𐐀
   (wcw/display-width example-string)
   ; ==> 1
   (count example-string))
