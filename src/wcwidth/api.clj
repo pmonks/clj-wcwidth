@@ -172,7 +172,7 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   (map wcwidth (string-to-code-points s)))
 
 (defn wcswidth
-  "Returns the number of columns needed to represent String s. If a nonprintable
+  "Returns the number of columns needed to represent String s. If a non-printing
 character occurs among these characters, -1 is returned."
   [s]
   (when s
@@ -182,7 +182,7 @@ character occurs among these characters, -1 is returned."
         (reduce + ws)))))
 
 (defn display-width
-  "Returns the number of columns needed to display String s, ignoring nonprintable
+  "Returns the number of columns needed to display String s, ignoring non-printing
 characters. For Clojure, this is generally more useful than wcswidth."
   [s]
   (when s
