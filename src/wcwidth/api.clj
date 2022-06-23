@@ -19,15 +19,36 @@
 (ns wcwidth.api
   (:require [clojure.string :as s]))
 
-(defn codepoint-to-string
-  "Converts any Unicode codepoint to a String.
+(defn code-point-to-string
+  "Returns the string representation of any Unicode code point†.
 
 This is useful because Clojure/Java string literals only support UTF-16 escape
 sequences for code points, which involves manual conversion of all supplementary
-code points into pairs of escapes."
-  [^Integer code-point]
+code points into pairs of escapes.
+
+†a character or integer, but note that Java/Clojure characters are limited to
+the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  [code-point]
   (when code-point
-    (s/join (java.lang.Character/toChars code-point))))
+    (s/join (java.lang.Character/toChars (int code-point)))))
+;    (java.lang.Character/toString code-point)))  ; Java 11+
+
+(defn code-points-to-string
+  "Returns a string made up of all of the given code points†
+
+†a sequence of characters or integers, but note that Java/Clojure characters are
+limited to the Unicode basic plane (first 0xFFFF code points) for historical
+reasons"
+  [code-points]
+  (when code-points
+    (s/join (map #(code-point-to-string (int %)) code-points))))
+
+(defn string-to-code-points
+  "Returns all of the Unicode code points in s, as a sequence of integers."
+  [^String s]
+  (when s
+    (let [a (.toArray (.codePoints s))]
+      (when a (vec a)))))   ; Note: seq nil-puns empty sequences, and vec "empty-sequence-puns" nil, so we don't have a core fn to do exactly what we want!
 
 ; Copied directly from https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java#L80 as of 2021-11-14
 ; That code is BSD-3-Clause.
@@ -128,7 +149,9 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
                (and (>= cp 0x30000) (<= cp 0x3FFFD)))))))  ; CJK Symbols and Punctuation
 
 (defn wcwidth
-  "Returns the number of columns needed to represent the code-point†. If code-point is a printable character, the value is at least 0. If code-point is a null character, the value is 0. Otherwise, -1 is returned.
+  "Returns the number of columns needed to represent the code-point†. If
+  code-point is a printable character, the value is at least 0. If code-point is
+  a null character, the value is 0. Otherwise, -1 is returned.
 
 †a character or integer, but note that Java/Clojure characters are limited to
 the Unicode basic plane (first 0xFFFF code points) for historical reasons"
@@ -142,16 +165,10 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
         (wide? cp)          2
         :else               1))))
 
-(defn code-points
-  "Returns all of the Unicode code points in s, as a sequence of integers."
-  [^String s]
-  (when s
-    (seq (.toArray (.codePoints s)))))
-
 (defn- widths
   "Returns a sequence of all of the widths of the Characters in String s."
   [s]
-  (map wcwidth (code-points s)))
+  (map wcwidth (string-to-code-points s)))
 
 (defn wcswidth
   "Returns the number of columns needed to represent String s. If a nonprintable

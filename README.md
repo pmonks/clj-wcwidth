@@ -19,7 +19,7 @@ This library provides a pure, zero-dependency Clojure implementation of the rule
 
 ## Why not `count`?
 
-When supplied with a string, [`count`](https://clojuredocs.org/clojure.core/count) counts the number of Java `char`s in that string, which (due to a historical oddity of the JVM) is not necessarily the same thing as a Unicode code point (Java `char`s are UTF-16 "code units", and Unicode code points in the supplementary planes require two such code units and therefore get counted as 2 `char`s on the JVM).  It also doesn't take non-printing and zero-width characters into account.
+When supplied with a string, [`count`](https://clojuredocs.org/clojure.core/count) counts the number of Java `char`s in that string, which (due to a historical oddity of the JVM) is not necessarily the same thing as a Unicode code point (Java `char`s are UTF-16 "code units", and Unicode code points in the supplementary planes require two such UTF-16 code units and therefore get counted as 2 `char`s on the JVM).  It also doesn't take non-printing and zero-width characters into account (more accurately, it counts them as `char`s, even though they're non-visible when printed).
 
 ## Installation
 
@@ -57,30 +57,31 @@ $ lein try com.github.pmonks/clj-wcwidth
 
 (wcw/display-width "hello, world")
 ; ==> 12
-(wcw/display-width "hello, 🤡")
+(wcw/display-width "hello, 🌏")
 ; ==> 9
 
-; Showing the difference between the POSIX wcswidth behaviour and the more useful for Clojure,
-; but non-POSIX, display-width behaviour:
+; Showing the difference between the POSIX wcswidth behaviour and the more
+; useful for Clojure, but non-POSIX, display-width behaviour:
 (let [example-string (str "hello, world" (wcw/codepoint-to-string 0x0084))]   ; non-printing code point
   (wcw/display-width example-string)
   ; ==> 12
   (wcw/wcswidth example-string)
   ; ==> -1
 
-  ; Also show why clojure.core/count gives incorrect results when non-printing code points are
-  ; present:
+  ; Also show why clojure.core/count gives incorrect results when non-printing
+  ; code points are present:
   (count example-string))
   ; ==> 13
 
-; And then show how a single width code point in a supplementary plane gets miscounted by count:
+; And then show how a single width code point in a supplementary plane gets
+; miscounted by count:
 (let [example-string (wcw/codepoint-to-string 0x10400)]  ; 𐐀
   (wcw/display-width example-string)
   ; ==> 1
   (count example-string))
   ; ==> 2
 
-; And another example of how count doesn't return display widths:
+; And another example of how count doesn't understand display columns:
 (let [example-string "👍👍🏻"]
   (wcw/display-width example-string)
   ; ==> 4

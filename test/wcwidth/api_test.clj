@@ -21,20 +21,68 @@
             [wcwidth.api    :as wcw]))
 
 (def code-point-clown-emoji          0x1F921)   ; 🤡
+(def code-point-globe-asia           0x1F30F)   ; 🌏
 (def code-point-combining-example    0x1D177)
 (def code-point-non-printing-example 0x0094)
 
-(deftest test-codepoint-to-string
-  (testing "ASCII codepoints"
-    (is (=  " " (wcw/codepoint-to-string 0x0020)))    ; space
-    (is (=  "#" (wcw/codepoint-to-string 0x0023)))    ; #
-    (is (=  "6" (wcw/codepoint-to-string 0x0036)))    ; 6
-    (is (=  "A" (wcw/codepoint-to-string 0x0041))))   ; A
+(deftest test-code-point-to-string
+  (testing "nil and empty"
+    (is (nil? (wcw/code-point-to-string nil))))
 
-  (testing "Unicode codepoints"
-    (is (= "🤡" (wcw/codepoint-to-string code-point-clown-emoji)))))
+  (testing "ASCII code points"
+    (is (=  " " (wcw/code-point-to-string 0x0020)))
+    (is (=  "#" (wcw/code-point-to-string 0x0023)))
+    (is (=  "6" (wcw/code-point-to-string 0x0036)))
+    (is (=  "A" (wcw/code-point-to-string 0x0041))))
+
+  (testing "Unicode code points"
+    (is (= "🤡" (wcw/code-point-to-string code-point-clown-emoji)))))
+
+(deftest test-code-points-to-string
+  (testing "nil and empty"
+    (is (nil? (wcw/code-points-to-string nil)))
+    (is (= "" (wcw/code-points-to-string []))))
+
+  (testing "ASCII code point"
+    (is (=  " " (wcw/code-points-to-string [0x0020])))
+    (is (=  "#" (wcw/code-points-to-string [0x0023])))
+    (is (=  "6" (wcw/code-points-to-string [0x0036])))
+    (is (=  "A" (wcw/code-points-to-string [0x0041]))))
+
+  (testing "Unicode code point"
+    (is (= "🤡" (wcw/code-points-to-string [code-point-clown-emoji]))))
+
+  (testing "Sequence of code points"
+    (is (= "Hello, 🌏!" (wcw/code-points-to-string [\H \e \l \l \o \, \space code-point-globe-asia \!])))))
+
+(deftest test-string-to-code-points
+  (testing "nil and empty"
+    (is (nil? (wcw/string-to-code-points nil)))
+    (is (= [] (wcw/string-to-code-points ""))))
+
+  (testing "ASCII code point"
+    (is (= [0x0020] (wcw/string-to-code-points " ")))
+    (is (= [0x0023] (wcw/string-to-code-points "#" )))
+    (is (= [0x0036] (wcw/string-to-code-points "6")))
+    (is (= [0x0041] (wcw/string-to-code-points "A"))))
+
+  (testing "Unicode code point"
+    (is (= [code-point-clown-emoji] (wcw/string-to-code-points "🤡"))))
+
+  (testing "Sequence of code points"
+    (is (= [(int \H) (int \e) (int \l) (int \l) (int \o) (int \,) (int \space) code-point-globe-asia (int \!)]
+           (wcw/string-to-code-points "Hello, 🌏!")))))
+
+(deftest test-roundtripping
+  (testing "Roundtripping of string-to-code-points and code-points-to-string"
+    (doall
+      (for [test [nil "" " " "\t" "\n" "Hello, world!" "Hello, 🌏!" "पीटर मोंक्सो" "彼得·蒙克斯"]]
+        (is (= test (wcw/code-points-to-string (wcw/string-to-code-points test))))))))
 
 (deftest test-wcwidth
+  (testing "nil"
+    (is (nil? (wcw/wcwidth nil))))
+
   (testing "ASCII codes"
     (is (zero?  (wcw/wcwidth 0x0000)))    ; NUL
     (is (= -1   (wcw/wcwidth 0x007F)))    ; DEL
@@ -78,6 +126,10 @@
     (is (= 2 (wcw/wcwidth code-point-clown-emoji))))
 
 (deftest test-wcswidth
+  (testing "nil and empty"
+    (is (nil? (wcw/wcswidth nil)))
+    (is (= 0  (wcw/wcswidth ""))))
+
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth "foo")))
     (is (= 12 (wcw/wcswidth "hello, world"))))
@@ -88,10 +140,14 @@
   (testing "Unicode - mixed widths"
     (is (= 10 (wcw/wcswidth "पीटर मोंक्सो")))
     (is (= 11 (wcw/wcswidth "彼得·蒙克斯")))
-    (is (=  9 (wcw/wcswidth (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
-    (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
+    (is (=  9 (wcw/wcswidth (str "hello, " (wcw/code-point-to-string code-point-clown-emoji)))))
+    (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/code-point-to-string code-point-non-printing-example)))))))
 
 (deftest test-display-width
+  (testing "nil and empty"
+    (is (nil? (wcw/display-width nil)))
+    (is (= 0  (wcw/display-width ""))))
+
   (testing "ASCII-only strings"
     (is (=  3 (wcw/display-width "foo")))
     (is (= 12 (wcw/display-width "hello, world"))))
@@ -102,5 +158,5 @@
   (testing "Unicode - mixed widths"
     (is (= 10 (wcw/display-width "पीटर मोंक्सो")))
     (is (= 11 (wcw/display-width "彼得·蒙克斯")))
-    (is (=  9 (wcw/display-width (str "hello, " (wcw/codepoint-to-string code-point-clown-emoji)))))
-    (is (= 12 (wcw/display-width (str "hello, world" (wcw/codepoint-to-string code-point-non-printing-example)))))))
+    (is (=  9 (wcw/display-width (str "hello, " (wcw/code-point-to-string code-point-clown-emoji)))))
+    (is (= 12 (wcw/display-width (str "hello, world" (wcw/code-point-to-string code-point-non-printing-example)))))))
