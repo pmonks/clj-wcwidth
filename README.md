@@ -49,7 +49,7 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/wcwidth \©)
 ; ==> 1
 (wcw/wcwidth 0x0000)   ; ASCII NUL (zero width)
-; ==> 0   (nul)
+; ==> 0
 (wcw/wcwidth 0x001B)   ; ASCII ESC (non printing)
 ; ==> -1
 (wcw/wcwidth 0x1F921)  ; 🤡 (double width)
