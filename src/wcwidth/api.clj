@@ -80,7 +80,7 @@ reasons"
 
 (defn- compare-combining-char
   "A comparator for comparing a code-point (within a singleton vector) against a
-   single range from combining-char-ranges."
+single range from combining-char-ranges."
   [a b]
   ; We have to do these shenanigans as java.util.Collections/binarySearch assumes we're comparing identical types
   ; (which we're not, in this case, at least conceptually), and hence will hand them to us in any order.
@@ -150,8 +150,9 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
 
 (defn wcwidth
   "Returns the number of columns needed to represent the code-point†. If
-  code-point is a printable character, the value is at least 0. If code-point is
-  a null character, the value is 0. Otherwise, -1 is returned.
+code-point is a printable character, the value is at least 0. If code-point is
+a null character, the value is 0. Otherwise, -1 is returned (the code-point is
+non-printing).
 
 †a character or integer, but note that Java/Clojure characters are limited to
 the Unicode basic plane (first 0xFFFF code points) for historical reasons"
@@ -172,7 +173,7 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
 
 (defn wcswidth
   "Returns the number of columns needed to represent String s. If a nonprintable
-   character occurs among these characters, -1 is returned."
+character occurs among these characters, -1 is returned."
   [s]
   (when s
     (let [ws (widths s)]
@@ -181,8 +182,8 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
         (reduce + ws)))))
 
 (defn display-width
-  "Returns the number of columns needed to display String s, ignoring
-   nonprintable characters. For Clojure, this is generally more useful than wcswidth."
+  "Returns the number of columns needed to display String s, ignoring nonprintable
+characters. For Clojure, this is generally more useful than wcswidth."
   [s]
   (when s
     (reduce + (remove #(<= % 0) (widths s)))))
