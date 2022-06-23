@@ -20,14 +20,18 @@
   (:require [clojure.string :as s]))
 
 (defn code-point-to-string
-  "Returns the string representation of any Unicode code point.
+  "Returns the string representation of any Unicode code point†.
 
 This is useful because Clojure/Java string literals only support UTF-16 escape
 sequences for code points, which involves manual conversion of all supplementary
-code points into pairs of escapes."
-  [^Integer code-point]
+code points into pairs of escapes.
+
+†a character or integer, but note that Java/Clojure characters are limited to
+the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  [code-point]
   (when code-point
-    (java.lang.Character/toString code-point)))
+    (s/join (java.lang.Character/toChars (int code-point)))))
+;    (java.lang.Character/toString code-point)))  ; Java 11+
 
 (defn code-points-to-string
   "Returns a string made up of all of the given code points†
