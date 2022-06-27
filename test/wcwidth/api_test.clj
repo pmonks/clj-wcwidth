@@ -127,8 +127,8 @@
 
 (deftest test-wcswidth
   (testing "nil and empty"
-    (is (nil? (wcw/wcswidth nil)))
-    (is (= 0  (wcw/wcswidth ""))))
+    (is (nil?  (wcw/wcswidth nil)))
+    (is (zero? (wcw/wcswidth ""))))
 
   (testing "ASCII-only strings"
     (is (=  3 (wcw/wcswidth "foo")))
@@ -145,8 +145,8 @@
 
 (deftest test-display-width
   (testing "nil and empty"
-    (is (nil? (wcw/display-width nil)))
-    (is (= 0  (wcw/display-width ""))))
+    (is (nil?  (wcw/display-width nil)))
+    (is (zero? (wcw/display-width ""))))
 
   (testing "ASCII-only strings"
     (is (=  3 (wcw/display-width "foo")))
