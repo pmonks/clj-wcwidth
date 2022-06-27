@@ -26,7 +26,7 @@
 (def code-point-non-printing-example 0x0094)
 
 (deftest test-code-point-to-string
-  (testing "nil and empty"
+  (testing "nil"
     (is (nil? (wcw/code-point-to-string nil))))
 
   (testing "ASCII code points"
