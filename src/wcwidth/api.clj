@@ -22,9 +22,9 @@
 (defn code-point-to-string
   "Returns the string representation of any Unicode code point†.
 
-This is useful because Clojure/Java string literals only support UTF-16 escape
-sequences for code points, which involves manual conversion of all supplementary
-code points into pairs of escapes.
+This is useful because Clojure/Java string literals only support escape
+sequences for code points in the basic plane, which involves manual conversion
+of all supplementary code points into pairs of escapes.
 
 †a character or integer, but note that Java/Clojure characters are limited to
 the Unicode basic plane (first 0xFFFF code points) for historical reasons"
@@ -41,7 +41,7 @@ limited to the Unicode basic plane (first 0xFFFF code points) for historical
 reasons"
   [code-points]
   (when code-points
-    (s/join (map #(code-point-to-string (int %)) code-points))))
+    (s/join (map code-point-to-string code-points))))
 
 (defn string-to-code-points
   "Returns all of the Unicode code points in s, as a sequence of integers."
@@ -125,7 +125,7 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
     (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] compare-combining-char) 0)))
 
 (defn wide?
-  "Is code-point† in the East Asian Wide (W) or East Asian Full-width (F) category?
+  "Is code-point† in the East Asian Wide (W), East Asian Full-width (F), or other wide character (e.g. emoji) category?
 
 †a character or integer, but note that Java/Clojure characters are limited to
 the Unicode basic plane (first 0xFFFF code points) for historical reasons"
@@ -160,14 +160,14 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   (when code-point
     (let [cp (int code-point)]
       (cond
-        (null? cp)          0
+        (null?         cp)  0
         (non-printing? cp) -1
-        (combining? cp)     0
-        (wide? cp)          2
+        (combining?    cp)  0
+        (wide?         cp)  2
         :else               1))))
 
 (defn- widths
-  "Returns a sequence of all of the widths of the Characters in String s."
+  "Returns a lazy sequence of all of the widths of the Characters in String s."
   [s]
   (map wcwidth (string-to-code-points s)))
 
