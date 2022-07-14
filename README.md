@@ -17,9 +17,11 @@ Java doesn't provide these functions however, so applications that need to know 
 
 This library provides a pure, zero-dependency Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
 
-## Why not `count`?
+## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
-When supplied with a string, [`count`](https://clojuredocs.org/clojure.core/count) counts the number of Java `char`s in that string, which (due to a historical oddity of the JVM) is not necessarily the same thing as a Unicode code point (Java `char`s are UTF-16 "code units", and Unicode code points in the supplementary planes require two such UTF-16 code units and therefore get counted as 2 `char`s on the JVM).  It also doesn't take non-printing and zero-width characters into account (more accurately, it counts them as `char`s, even though they're non-visible when printed).
+When supplied with a sequence of characters (normally a `String`, though also a Java `char[]`), `count` simply counts the number of Java `char`s in that sequence, which, due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), is not necessarily the same thing as a Unicode code point (what we generally now think of as a "character"). Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes can only be represented by two such code units (and therefore get counted as 2 `char`s on the JVM, when present in a sequence of characters).
+
+Furthermore, `count` doesn't account for non-printing and zero-width Unicode code points; it counts them as `char`s even though they take up zero width when printed.
 
 ## Installation
 
