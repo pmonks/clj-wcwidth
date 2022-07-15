@@ -57,33 +57,30 @@ $ lein try com.github.pmonks/clj-wcwidth
 (wcw/wcwidth 0x1F921)  ; 🤡 (double width)
 ; ==> 2
 
-(wcw/display-width "hello, world")
+(wcw/display-width "hello, world")  ; all single width
 ; ==> 12
-(wcw/display-width "hello, 🌏")
+(wcw/display-width "hello, 🌏")     ; mixed single and double width
 ; ==> 9
 
 ; Showing the difference between the POSIX wcswidth behaviour and the more
-; useful for Clojure, but non-POSIX, display-width behaviour:
+; useful in Clojure, but non-POSIX, display-width behaviour:
 (let [example-string (str "hello, world" (wcw/code-point-to-string 0x0084))]   ; non-printing code point
   (wcw/display-width example-string)
   ; ==> 12
   (wcw/wcswidth example-string)
   ; ==> -1
 
-  ; Also show why clojure.core/count gives incorrect results when non-printing
-  ; code points are present:
+  ; Also show why clojure.core/count is inappropriate for determining display width:
   (count example-string))
   ; ==> 13
 
-; And then show how a single width code point in a supplementary plane gets
-; miscounted by count:
+; More examples showing why clojure.core/count is inappropriate for determining display width:
 (let [example-string (wcw/code-point-to-string 0x10400)]  ; 𐐀
   (wcw/display-width example-string)
   ; ==> 1
   (count example-string))
   ; ==> 2
 
-; And another example of how count doesn't understand display columns:
 (let [example-string "👍👍🏻"]
   (wcw/display-width example-string)
   ; ==> 4
