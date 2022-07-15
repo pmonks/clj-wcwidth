@@ -15,7 +15,7 @@ When printing Unicode characters to a fixed-width display device (e.g. a termina
 
 Java doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
 
-This library provides a pure, zero-dependency Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
+This library provides a small, zero-dependency, pure Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
 
 ## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
