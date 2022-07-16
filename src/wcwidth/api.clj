@@ -78,7 +78,7 @@ reasons"
    [0x10A38 0x10A3A] [0x10A3F 0x10A3F] [0x1D167 0x1D169] [0x1D173 0x1D182] [0x1D185 0x1D18B] [0x1D1AA 0x1D1AD]
    [0x1D242 0x1D244] [0x1F3FB 0x1F3FF] [0xE0001 0xE0001] [0xE0020 0xE007F] [0xE0100 0xE01EF]])
 
-(defn- compare-combining-char
+(defn- char-range-comparator
   "A comparator for comparing a code-point (within a singleton vector) against a
 single range from combining-char-ranges."
   [a b]
@@ -122,10 +122,11 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
 the Unicode basic plane (first 0xFFFF code points) for historical reasons"
   [code-point]
   (when code-point
-    (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] compare-combining-char) 0)))
+    (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] char-range-comparator) 0)))
 
 (defn wide?
-  "Is code-point† in the East Asian Wide (W), East Asian Full-width (F), or other wide character (e.g. emoji) category?
+  "Is code-point† in the East Asian Wide (W), East Asian Full-width (F), or
+other wide character (e.g. emoji) category?
 
 †a character or integer, but note that Java/Clojure characters are limited to
 the Unicode basic plane (first 0xFFFF code points) for historical reasons"
@@ -144,7 +145,9 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
                (and (>= cp 0xFE30)  (<= cp 0xFE6F))        ; CJK Compatibility Forms
                (and (>= cp 0xFF00)  (<= cp 0xFF60))        ; Fullwidth Forms
                (and (>= cp 0xFFE0)  (<= cp 0xFFE6))
-               (and (>= cp 0x1F000) (<= cp 0x1FEEE))       ; Emoji
+               (and (>= cp 0x2600)  (<= cp 0x27BF))        ; Emoji-like codepoints - see this custom implementation of wcwidth (BSD-2-Clause): https://github.com/fumiyas/wcwidth-cjk/blob/master/wcwidth.c#L296-L297
+               (and (>= cp 0x1F000) (<= cp 0x1FEEE)        ; Emoji
+                    (not (combining? cp)))
                (and (>= cp 0x20000) (<= cp 0x2FFFD))       ; CJK Unified Ideographs Extension B
                (and (>= cp 0x30000) (<= cp 0x3FFFD)))))))  ; CJK Symbols and Punctuation
 
@@ -182,8 +185,9 @@ character occurs among these characters, -1 is returned."
         (reduce + ws)))))
 
 (defn display-width
-  "Returns the number of columns needed to display String s, ignoring non-printing
-characters. For Clojure, this is generally more useful than wcswidth."
+  "Returns the number of columns needed to display String s, ignoring
+non-printing characters. For Clojure, this is generally more useful than
+wcswidth."
   [s]
   (when s
     (reduce + (remove #(<= % 0) (widths s)))))
