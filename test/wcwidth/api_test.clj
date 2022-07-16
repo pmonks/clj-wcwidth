@@ -139,6 +139,9 @@
   (testing "Unicode - all single width"
     (is (= 28 (wcw/wcswidth "Copyright © Peter Monks 2022"))))
 
+  (testing "Unicode - all double width, with some non-printing as well"
+    (is (= 4 (wcw/wcswidth (wcw/code-points-to-string [0x1F44D 0x1F44D 0x1F3FB])))))  ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
+
   (testing "Unicode - mixed widths"
     (is (= 10 (wcw/wcswidth "पीटर मोंक्सो")))
     (is (= 11 (wcw/wcswidth "彼得·蒙克斯")))
@@ -156,6 +159,9 @@
 
   (testing "Unicode - all single width"
     (is (= 28 (wcw/display-width "Copyright © Peter Monks 2022"))))
+
+  (testing "Unicode - all double width, with some non-printing as well"
+    (is (= 4 (wcw/wcswidth (wcw/code-points-to-string [0x1F44D 0x1F44D 0x1F3FB])))))  ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
 
   (testing "Unicode - mixed widths"
     (is (= 10 (wcw/display-width "पीटर मोंक्सो")))
