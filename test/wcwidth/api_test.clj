@@ -24,6 +24,7 @@
 (def code-point-globe-asia           0x1F30F)   ; 🌏
 (def code-point-combining-example    0x1D177)
 (def code-point-non-printing-example 0x0094)
+(def code-point-medium-white-circle  0x26AA)    ; ⚪️ - this one is tricky as UTR#11 doesn't define a width for it - it's in the "Miscellaenous symbols" category, rather than the emoji category
 
 (deftest test-code-point-to-string
   (testing "nil"
@@ -123,7 +124,8 @@
     (is (= 1 (wcw/wcwidth 0x10400))))   ; 𐐀
 
   (testing "Unicode - double width")
-    (is (= 2 (wcw/wcwidth code-point-clown-emoji))))
+    (is (= 2 (wcw/wcwidth code-point-clown-emoji)))
+    (is (= 2 (wcw/wcwidth code-point-medium-white-circle))))  ; Note: this isn't aligned with UTR#11, but it works better in practice
 
 (deftest test-wcswidth
   (testing "nil and empty"
@@ -136,6 +138,9 @@
 
   (testing "Unicode - all single width"
     (is (= 28 (wcw/wcswidth "Copyright © Peter Monks 2022"))))
+
+  (testing "Unicode - all double width, with some non-printing as well"
+    (is (= 4 (wcw/wcswidth (wcw/code-points-to-string [0x1F44D 0x1F44D 0x1F3FB])))))  ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
 
   (testing "Unicode - mixed widths"
     (is (= 10 (wcw/wcswidth "पीटर मोंक्सो")))
@@ -154,6 +159,9 @@
 
   (testing "Unicode - all single width"
     (is (= 28 (wcw/display-width "Copyright © Peter Monks 2022"))))
+
+  (testing "Unicode - all double width, with some non-printing as well"
+    (is (= 4 (wcw/wcswidth (wcw/code-points-to-string [0x1F44D 0x1F44D 0x1F3FB])))))  ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
 
   (testing "Unicode - mixed widths"
     (is (= 10 (wcw/display-width "पीटर मोंक्सो")))

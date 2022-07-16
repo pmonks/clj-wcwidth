@@ -11,15 +11,15 @@ Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages
 
 ## Why?
 
-When printing Unicode characters to a fixed-width display device (e.g. a terminal), every Unicode code point has a well-defined "column width".  This was originally standardised in [Unicode Technical Report #11](https://unicode.org/reports/tr11-5/), and implemented as the POSIX functions `wcwidth` and `wcswidth` soon after.
+When printing Unicode characters to a fixed-width display device (e.g. a terminal), every Unicode code point has a well-defined "column width".  This has been standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), and implemented as the POSIX functions `wcwidth` and `wcswidth`.
 
 Java doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
 
-This library provides a pure, zero-dependency Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
+This library provides a small, zero-dependency, pure Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that.
 
 ## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
-When supplied with a sequence of characters (normally a `String`, though also a Java `char[]`), `count` simply counts the number of Java `char`s in that sequence, which, due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), is not necessarily the same thing as a Unicode code point (what we generally now think of as a "character"). Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes are represented by two such code units (and therefore get counted as 2 `char`s on the JVM, when present in a sequence of characters).
+When supplied with a sequence of characters (normally a `String`, though also a Java `char[]`), `count` simply counts the number of Java `char`s in that sequence, which, due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), is not necessarily the same thing as a Unicode code point (what we generally now think of as a "character"). Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes are represented by two such code units (and therefore as 2 `char`s on the JVM).
 
 Furthermore, `count` doesn't account for non-printing and zero-width Unicode code points; it counts them as `char`s even though they take up zero width when printed.
 
