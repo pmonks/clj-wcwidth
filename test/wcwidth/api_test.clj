@@ -24,6 +24,7 @@
 (def code-point-globe-asia           0x1F30F)   ; 🌏
 (def code-point-combining-example    0x1D177)
 (def code-point-non-printing-example 0x0094)
+(def code-point-medium-white-circle  0x26AA)    ; ⚪️ - this one is tricky as UTR#11 doesn't define a width for it - it's in the "Miscellaenous symbols" category, rather than the emoji category
 
 (deftest test-code-point-to-string
   (testing "nil"
@@ -123,7 +124,8 @@
     (is (= 1 (wcw/wcwidth 0x10400))))   ; 𐐀
 
   (testing "Unicode - double width")
-    (is (= 2 (wcw/wcwidth code-point-clown-emoji))))
+    (is (= 2 (wcw/wcwidth code-point-clown-emoji)))
+    (is (= 2 (wcw/wcwidth code-point-medium-white-circle))))  ; Note: this isn't aligned with UTR#11, but it works better in practice
 
 (deftest test-wcswidth
   (testing "nil and empty"
