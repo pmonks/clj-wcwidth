@@ -135,8 +135,8 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
     (let [cp (int code-point)]
       (and (>= cp 0x1100)
            (or (<= cp 0x115F)                              ; Hangul Jamo init. consonants
-               (=  cp 0x2329)
-               (=  cp 0x232A)
+               (=  cp 0x2329)                              ; Left pointing angle bracket
+               (=  cp 0x232A)                              ; Right pointing angle bracket
                (and (not= cp 0x303F)                       ; CJK ... Yi
                     (>= cp 0x2E80)  (<= cp 0xA4CF))
                (and (>= cp 0xAC00)  (<= cp 0xD7A3))        ; Hangul Syllables
@@ -144,8 +144,11 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
                (and (>= cp 0xFE10)  (<= cp 0xFE19))        ; Vertical forms
                (and (>= cp 0xFE30)  (<= cp 0xFE6F))        ; CJK Compatibility Forms
                (and (>= cp 0xFF00)  (<= cp 0xFF60))        ; Fullwidth Forms
-               (and (>= cp 0xFFE0)  (<= cp 0xFFE6))
-               (and (>= cp 0x2600)  (<= cp 0x27BF))        ; Emoji-like codepoints - see this custom implementation of wcwidth (BSD-2-Clause): https://github.com/fumiyas/wcwidth-cjk/blob/master/wcwidth.c#L296-L297
+               (and (>= cp 0xFFE0)  (<= cp 0xFFE6))        ; Fullwidth Forms
+               (and (>= cp 0x2B1B)  (<= cp 0x2B1C))        ; Black and white large squares
+               (= cp 0x2B50)                               ; White medium star
+               (= cp 0x2B55)                               ; Heavy large circle
+               (and (>= cp 0x2600)  (<= cp 0x27BF))        ; Miscellaneous symbols
                (and (>= cp 0x1F000) (<= cp 0x1FEEE)        ; Emoji
                     (not (combining? cp)))
                (and (>= cp 0x20000) (<= cp 0x2FFFD))       ; CJK Unified Ideographs Extension B

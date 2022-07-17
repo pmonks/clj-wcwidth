@@ -123,9 +123,16 @@
     (is (= 1 (wcw/wcwidth \█)))
     (is (= 1 (wcw/wcwidth 0x10400))))   ; 𐐀
 
-  (testing "Unicode - double width")
+  (testing "Unicode - double width"
     (is (= 2 (wcw/wcwidth code-point-clown-emoji)))
-    (is (= 2 (wcw/wcwidth code-point-medium-white-circle))))  ; Note: this isn't aligned with UTR#11, but it works better in practice
+    ; Note: these aren't aligned with UTR#11, but work better in practice
+    (is (= 2 (wcw/wcwidth 0x26AA)))    ; ⚪️
+    (is (= 2 (wcw/wcwidth 0x26AB)))    ; ⚫️
+    (is (= 2 (wcw/wcwidth 0x1F7E2)))   ; 🟢
+    (is (= 2 (wcw/wcwidth 0x2B1B)))    ; ⬛️
+    (is (= 2 (wcw/wcwidth 0x2B1C)))    ; ⬜️
+    (is (= 2 (wcw/wcwidth 0x1F7E7)))   ; 🟧
+    (is (= 2 (wcw/wcwidth 0x2B50)))))  ; ⭐️
 
 (deftest test-wcswidth
   (testing "nil and empty"
