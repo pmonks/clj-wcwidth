@@ -155,6 +155,19 @@
     (is (=  9 (wcw/wcswidth (str "hello, " (wcw/code-point-to-string code-point-clown-emoji)))))
     (is (= -1 (wcw/wcswidth (str "hello, world" (wcw/code-point-to-string code-point-non-printing-example)))))))
 
+(deftest test-remove-ansi
+  (testing "nil, empty, blank"
+    (is (nil?            (wcw/remove-ansi nil)))
+    (is (= ""            (wcw/remove-ansi "")))
+    (is (= "  \t \n \r " (wcw/remove-ansi "  \t \n \r "))))
+  (testing "no ANSI sequences"
+    (is (= "hello, world"                      (wcw/remove-ansi "hello, world")))
+    (is (= (wcw/code-points-to-string [27])    (wcw/remove-ansi (wcw/code-points-to-string [27]))))     ; "Naked" ESC
+    (is (= (wcw/code-points-to-string [27 59]) (wcw/remove-ansi (wcw/code-points-to-string [27 59])))))  ; ESC;
+  (testing "ANSI sequence"
+    (is (= "0123456789"   (wcw/remove-ansi (wcw/code-points-to-string [27 91 57 50 109 48 49 50 51 52 53 54 55 56 57 27 91 109])))  ; ANSI fg colour bright green, ASCI digits 0-9, ANSI fg colour reset
+    (is (= "Hello World!" (wcw/remove-ansi (wcw/code-points-to-string [27 91 51 49 109 72 101 108 27 91 51 49 109 27 91 52 55 109 108 111 27 91 109 27 91 109 32 27 91 49 109 27 91 51 51 109 87 111 114 27 91 109 27 91 49 109 108 100 33 27 91 109])))))))  ; "Hello World!" with various inline formatting (FG & BG colours, attributes)
+
 (deftest test-display-width
   (testing "nil and empty"
     (is (nil?  (wcw/display-width nil)))
@@ -174,4 +187,12 @@
     (is (= 10 (wcw/display-width "पीटर मोंक्सो")))
     (is (= 11 (wcw/display-width "彼得·蒙克斯")))
     (is (=  9 (wcw/display-width (str "hello, " (wcw/code-point-to-string code-point-clown-emoji)))))
-    (is (= 12 (wcw/display-width (str "hello, world" (wcw/code-point-to-string code-point-non-printing-example)))))))
+    (is (= 12 (wcw/display-width (str "hello, world" (wcw/code-point-to-string code-point-non-printing-example))))))
+
+  (testing "ANSI escape sequences"
+    (let [string-with-ansi (wcw/code-points-to-string [27 91 57 50 109 48 49 50 51 52 53 54 55 56 57 27 91 109])]  ; ANSI fg colour bright green, ASCI digits 0-9, ANSI fg colour reset
+      (is (= 10 (wcw/display-width string-with-ansi)))
+      (is (= 16 (wcw/display-width string-with-ansi {:ignore-ansi? true}))))
+    (let [string-with-ansi (wcw/code-points-to-string [27 91 51 49 109 72 101 108 27 91 51 49 109 27 91 52 55 109 108 111 27 91 109 27 91 109 32 27 91 49 109 27 91 51 51 109 87 111 114 27 91 109 27 91 49 109 108 100 33 27 91 109])]  ; "Hello World!" with various inline formatting (FG & BG colours, attributes)
+      (is (= 12 (wcw/display-width string-with-ansi)))
+      (is (= 42 (wcw/display-width string-with-ansi {:ignore-ansi? true}))))))
