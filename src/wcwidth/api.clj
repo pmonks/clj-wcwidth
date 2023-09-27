@@ -20,31 +20,31 @@
   (:require [clojure.string :as s]))
 
 (defn code-point-to-string
-  "Returns the string representation of any Unicode code point†.
+  "Returns the string representation of any Unicode code-point†.
 
-This is useful because Clojure/Java string literals only support escape
-sequences for code points in the basic plane, which involves manual conversion
-of all supplementary code points into pairs of escapes.
+  This is useful because Clojure/Java string literals only support escape
+  sequences for code-points in the basic plane, which involves manual conversion
+  of all supplementary code-points into pairs of escapes.
 
-†a character or integer, but note that Java/Clojure characters are limited to
-the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  †a character or integer, but note that Java/Clojure characters are limited to
+  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
   [code-point]
   (when code-point
     (s/join (java.lang.Character/toChars (int code-point)))))
 ;    (java.lang.Character/toString code-point)))  ; Java 11+
 
 (defn code-points-to-string
-  "Returns a string made up of all of the given code points†
+  "Returns a string made up of all of the given code-points†
 
-†a sequence of characters or integers, but note that Java/Clojure characters are
-limited to the Unicode basic plane (first 0xFFFF code points) for historical
-reasons"
+  †a sequence of characters or integers, but note that Java/Clojure characters
+  are limited to the Unicode basic plane (first 0xFFFF code-points) for
+  historical reasons"
   [code-points]
   (when code-points
     (s/join (map code-point-to-string code-points))))
 
 (defn string-to-code-points
-  "Returns all of the Unicode code points in s, as a sequence of integers."
+  "Returns all of the Unicode code-points in s, as a sequence of integers."
   [^String s]
   (when s
     (let [a (.toArray (.codePoints s))]
@@ -80,7 +80,7 @@ reasons"
 
 (defn- char-range-comparator
   "A comparator for comparing a code-point (within a singleton vector) against a
-single range from combining-char-ranges."
+  single range from combining-char-ranges."
   [a b]
   ; We have to do these shenanigans as java.util.Collections/binarySearch assumes we're comparing identical types
   ; (which we're not, in this case, at least conceptually), and hence will hand them to us in any order.
@@ -97,8 +97,8 @@ single range from combining-char-ranges."
 (defn null?
   "Is code-point† a null character?
 
-†a character or integer, but note that Java/Clojure characters are limited to
-the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  †a character or integer, but note that Java/Clojure characters are limited to
+  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
   [code-point]
   (when code-point
     (= 0x0000 (int code-point))))
@@ -106,8 +106,8 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
 (defn non-printing?
   "Is code-point† a non-printing character?
 
-†a character or integer, but note that Java/Clojure characters are limited to
-the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  †a character or integer, but note that Java/Clojure characters are limited to
+  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -118,18 +118,18 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
 (defn combining?
   "Is code-point† a combining character?
 
-†a character or integer, but note that Java/Clojure characters are limited to
-the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  †a character or integer, but note that Java/Clojure characters are limited to
+  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
   [code-point]
   (when code-point
     (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] char-range-comparator) 0)))
 
 (defn wide?
   "Is code-point† in the East Asian Wide (W), East Asian Full-width (F), or
-other wide character (e.g. emoji) category?
+  other wide character (e.g. emoji) category?
 
-†a character or integer, but note that Java/Clojure characters are limited to
-the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  †a character or integer, but note that Java/Clojure characters are limited to
+  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -156,12 +156,12 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
 
 (defn wcwidth
   "Returns the number of columns needed to represent the code-point†. If
-code-point is a printable character, the value is at least 0. If code-point is
-a null character, the value is 0. Otherwise, -1 is returned (the code-point is
-non-printing).
+  code-point is a printable character, the value is at least 0. If code-point is
+  a null character, the value is 0. Otherwise, -1 is returned (the code-point is
+  non-printing).
 
-†a character or integer, but note that Java/Clojure characters are limited to
-the Unicode basic plane (first 0xFFFF code points) for historical reasons"
+  †a character or integer, but note that Java/Clojure characters are limited to
+  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -173,13 +173,13 @@ the Unicode basic plane (first 0xFFFF code points) for historical reasons"
         :else               1))))
 
 (defn- widths
-  "Returns a lazy sequence of all of the widths of the Characters in String s."
+  "Returns a lazy sequence of all of the widths of the code-points in String s."
   [s]
   (map wcwidth (string-to-code-points s)))
 
 (defn wcswidth
   "Returns the number of columns needed to represent String s. If a non-printing
-character occurs among these characters, -1 is returned."
+  code-point occurs in s, -1 is returned."
   [s]
   (when s
     (let [ws (widths s)]
@@ -189,8 +189,8 @@ character occurs among these characters, -1 is returned."
 
 (defn display-width
   "Returns the number of columns needed to display String s, ignoring
-non-printing characters. For Clojure, this is generally more useful than
-wcswidth."
+  non-printing code-points. For Clojure, this is generally more useful than
+  wcswidth."
   [s]
   (when s
     (reduce + (remove #(<= % 0) (widths s)))))
