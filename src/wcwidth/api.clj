@@ -187,10 +187,25 @@
         -1
         (reduce + ws)))))
 
-(defn display-width
-  "Returns the number of columns needed to display String s, ignoring
-  non-printing code-points. For Clojure, this is generally more useful than
-  wcswidth."
+; cf. https://www.ecma-international.org/publications-and-standards/standards/ecma-48/
+(def ^:private ansi-re #"(\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
+
+(defn remove-ansi
+  "Strips all ANSI escape sequences from the given String."
   [s]
   (when s
-    (reduce + (remove #(<= % 0) (widths s)))))
+    (s/replace s ansi-re "")))
+
+(defn display-width
+  "Returns the number of columns needed to display String s, but deviates from
+  POSIX wcswidth behaviour in some key ways i.e. non-printing characters are
+  considered 0 width (instead of causing the entire result to be -1), and ANSI
+  escape sequences are (by default) also considered zero width.
+
+  For most use cases, this function is generally more useful than wcswidth,
+  despite not adhering to POSIX."
+  ([s] (display-width s nil))
+  ([s & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
+   (when s
+     (let [s (if ignore-ansi? s (remove-ansi s))]
+       (reduce + (remove #(<= % 0) (widths s)))))))
