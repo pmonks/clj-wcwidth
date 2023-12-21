@@ -32,7 +32,7 @@ Furthermore, `count` doesn't account for non-printing and zero-width Unicode cod
 #### Clojure CLI
 
 ```shell
-$ clojure -Sdeps '{:deps {com.github.pmonks/clj-wcwidth {:mvn/version "#.#.#"}}}'  # Where #.#.# is replaced with an actual version number (see badge above)
+$ clojure -Sdeps '{:deps {com.github.pmonks/clj-wcwidth {:mvn/version "RELEASE"}}}'
 ```
 
 #### Leiningen
