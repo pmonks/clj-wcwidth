@@ -4,4 +4,4 @@ Creator: Peter Monks
 PackageName: com.github.pmonks/clj-wcwidth
 PackageOriginator: Peter Monks
 PackageHomePage: https://github.com/pmonks/clj-wcwidth
-PackageLicenseDeclared: Apache-2.0
+PackageLicenseDeclared: MPL-2.0
