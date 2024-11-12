@@ -12,31 +12,35 @@
   (:require [clojure.string :as s]))
 
 (defn code-point-to-string
-  "Returns the string representation of any Unicode code-point†.
+  "Returns the `String` representation of any Unicode `code-point`<sup>†</sup>.
 
-  This is useful because Clojure/Java string literals only support escape
-  sequences for code-points in the basic plane, which involves manual conversion
-  of all supplementary code-points into pairs of escapes.
+  One of the ways this is useful is because Clojure/Java `String` literals only
+  support escape sequences (i.e. `\"\\uXXXX\"`) for code-points in the basic
+  plane; code points in the supplementary planes must be manually converted into
+  their [UTF-16 surrogate pair](https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF),
+  and then each element in the pair escaped (tedious and error prone).
 
-  †a character or integer, but note that Java/Clojure characters are limited to
-  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
+  <sup>†</sup>a `Character` or `int`, but note that Java/Clojure characters are
+  limited to the Unicode basic plane (first 0xFFFF code-points) for [historical
+  reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-point]
   (when code-point
     (s/join (java.lang.Character/toChars (int code-point)))))
 ;    (java.lang.Character/toString code-point)))  ; Java 11+
 
 (defn code-points-to-string
-  "Returns a string made up of all of the given code-points†
+  "Returns a `String` made up of all of the given `code-points`<sup>†</sup>
 
-  †a sequence of characters or integers, but note that Java/Clojure characters
-  are limited to the Unicode basic plane (first 0xFFFF code-points) for
-  historical reasons"
+  <sup>†</sup>a sequence of `Character`s or `int`s, but note that Java/Clojure
+  characters are limited to the Unicode basic plane (first 0xFFFF code-points)
+  for [historical reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-points]
   (when code-points
     (s/join (map code-point-to-string code-points))))
 
 (defn string-to-code-points
-  "Returns all of the Unicode code-points in s, as a sequence of integers."
+  "Returns all of the Unicode code-points in `s` (a `String`), as a sequence of
+  `int`s."
   [^String s]
   (when s
     (let [a (.toArray (.codePoints s))]
@@ -87,19 +91,21 @@
       :else                 0)))
 
 (defn null?
-  "Is code-point† a null character?
+  "Is `code-point`<sup>†</sup> a null character?
 
-  †a character or integer, but note that Java/Clojure characters are limited to
-  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
+  <sup>†</sup>a `Character` or `int`, but note that Java/Clojure characters are
+  limited to the Unicode basic plane (first 0xFFFF code-points) for [historical
+  reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-point]
   (when code-point
     (= 0x0000 (int code-point))))
 
 (defn non-printing?
-  "Is code-point† a non-printing character?
+  "Is `code-point`<sup>†</sup> a non-printing character?
 
-  †a character or integer, but note that Java/Clojure characters are limited to
-  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
+  <sup>†</sup>a `Character` or `int`, but note that Java/Clojure characters are
+  limited to the Unicode basic plane (first 0xFFFF code-points) for [historical
+  reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -108,20 +114,22 @@
                (<  cp 0x00A0))))))
 
 (defn combining?
-  "Is code-point† a combining character?
+  "Is `code-point`<sup>†</sup> a combining character?
 
-  †a character or integer, but note that Java/Clojure characters are limited to
-  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
+  <sup>†</sup>a `Character` or `int`, but note that Java/Clojure characters are
+  limited to the Unicode basic plane (first 0xFFFF code-points) for [historical
+  reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-point]
   (when code-point
     (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] char-range-comparator) 0)))
 
 (defn wide?
-  "Is code-point† in the East Asian Wide (W), East Asian Full-width (F), or
-  other wide character (e.g. emoji) category?
+  "Is `code-point`<sup>†</sup> in the East Asian Wide (W), East Asian Full-width
+  (F), or other wide character (e.g. emoji) category?
 
-  †a character or integer, but note that Java/Clojure characters are limited to
-  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
+  <sup>†</sup>a `Character` or `int`, but note that Java/Clojure characters are
+  limited to the Unicode basic plane (first 0xFFFF code-points) for [historical
+  reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -147,13 +155,14 @@
                (and (>= cp 0x30000) (<= cp 0x3FFFD)))))))  ; CJK Symbols and Punctuation
 
 (defn wcwidth
-  "Returns the number of columns needed to represent the code-point†. If
-  code-point is a printable character, the value is at least 0. If code-point is
-  a null character, the value is 0. Otherwise, -1 is returned (the code-point is
-  non-printing).
+  "Returns the number of columns needed to represent the `code-point`
+  <sup>†</sup>. If `code-point` is a printable character, the value is at least
+  `0`. If `code-point` is a null character, the value is `0`. Otherwise, `-1` is
+  returned (the `code-point` is non-printing).
 
-  †a character or integer, but note that Java/Clojure characters are limited to
-  the Unicode basic plane (first 0xFFFF code-points) for historical reasons"
+  <sup>†</sup>a `Character` or `int`, but note that Java/Clojure characters are
+  limited to the Unicode basic plane (first 0xFFFF code-points) for [historical
+  reasons](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   [code-point]
   (when code-point
     (let [cp (int code-point)]
@@ -165,13 +174,14 @@
         :else               1))))
 
 (defn- widths
-  "Returns a lazy sequence of all of the widths of the code-points in String s."
+  "Returns a lazy sequence of all of the widths of the code-points in `s` (a
+  `String`)."
   [s]
   (map wcwidth (string-to-code-points s)))
 
 (defn wcswidth
-  "Returns the number of columns needed to represent String s. If a non-printing
-  code-point occurs in s, -1 is returned."
+  "Returns the number of columns needed to represent `s` (a `String`). If a
+  non-printing code-point occurs in `s`, `-1` is returned (as defined in POSIX)."
   [s]
   (when s
     (let [ws (widths s)]
@@ -183,19 +193,20 @@
 (def ^:private ansi-re #"(\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
 
 (defn remove-ansi
-  "Strips all ANSI escape sequences from the given String."
+  "Strips all ANSI escape sequences from `s` (a `String`)."
   [s]
   (when s
     (s/replace s ansi-re "")))
 
 (defn display-width
-  "Returns the number of columns needed to display String s, but deviates from
-  POSIX wcswidth behaviour in some key ways i.e. non-printing characters are
-  considered 0 width (instead of causing the entire result to be -1), and ANSI
-  escape sequences are (by default) also considered zero width.
+  "Returns the number of columns needed to display `s` (a `String`), but
+  deviates from POSIX [[wcswidth]] behaviour in some key ways i.e. non-printing
+  characters are considered `0` width (instead of causing the entire result to
+  be `-1`), and ANSI escape sequences are (by default) also considered zero
+  width.
 
-  For most use cases, this function is generally more useful than wcswidth,
-  despite not adhering to POSIX."
+  For most use cases, this function is more useful than [[wcswidth]], despite
+  not adhering to POSIX."
   ([s] (display-width s nil))
   ([s & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
    (when s
