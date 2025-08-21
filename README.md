@@ -16,7 +16,7 @@ When Unicode grapheme clusters ("characters") are sent to a fixed-width device (
 
 The JVM doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [ICU4J](https://unicode-org.github.io/icu/userguide/icu4j/) and [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
 
-This library provides a small, zero-dependency-by-default, pure Clojure implementation of this functionality and goes further by (optionally) also taking [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) into account (as these are also zero width on an ANSI-capable terminal).
+This library provides a small, zero-dependency-by-default, pure Clojure implementation of this functionality and goes further by (optionally) also taking [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) into account (as these are also zero width on an ANSI-capable device).
 
 ## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
