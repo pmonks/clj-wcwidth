@@ -96,7 +96,7 @@ $ deps-try com.github.pmonks/clj-wcwidth
 
 (wcw/wcswidth (str "hello, " ascii-esc))
 ; ==> -1
-(wcw/display-width (str "hello, " ascii-esc ))  ; ASCII ESC
+(wcw/display-width (str "hello, " ascii-esc))
 ; ==> 7
 
 ;; ANSI escape code support
@@ -105,7 +105,7 @@ $ deps-try com.github.pmonks/clj-wcwidth
 (wcw/display-width (str "hello, " ansi-hide-cursor))
 ; ==> 7
 
-;; Examples showing how clojure.core/count doesn't work
+;; Examples showing how clojure.core/count doesn't work for this use case
 
 (def jerome (wcw/code-points-to-string [\J \e 0x0341 \r \o 0x0302 \m \e]))  ; Jérôme, using combining diacritics
 (wcw/display-width jerome)
@@ -125,10 +125,10 @@ $ deps-try com.github.pmonks/clj-wcwidth
 (count lots-of-escapes)
 ; ==> 1000                  ; lol 🤡
 
-(def trans-flag (wcw/code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F]))  ; 🏳️‍⚧️
-(wcw/display-width trans-flag)
+(def transgender-flag (wcw/code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F]))  ; 🏳️‍⚧️
+(wcw/display-width transgender-flag)
 ; ==> 2
-(count trans-flag)
+(count transgender-flag)
 ; ==> 6                     ; lol 🤡
 ```
 
