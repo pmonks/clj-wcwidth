@@ -27,7 +27,7 @@
   Notes:
 
   * Will use [ICU4J's `BreakIterator`](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/BreakIterator.html)
-    class when available, falling back on the [JDK's `BreakIterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html)
+    class when available, falling back on the [JDK's lower quality `BreakIterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html)
     class otherwise"
   [^String s]
   (when s
