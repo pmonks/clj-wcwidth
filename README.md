@@ -12,27 +12,31 @@ Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages
 
 ## Why?
 
-When outputing Unicode grapheme clusters ("characters") to a fixed-width device (e.g. a terminal or monospaced editor), many have a well-defined "notional width", expressed in units of columns (where a typical ASCII character takes up 1 column).  This is partially standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), and implemented as the POSIX functions `wcwidth` and `wcswidth`.
+When Unicode grapheme clusters ("characters") are sent to a fixed-width device (e.g. a terminal or monospaced editor), many have a well-defined "notional width", expressed in units of columns (where a typical ASCII character takes up 1 column).  This is partially standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), which is implemented as the POSIX functions `wcwidth` and `wcswidth`.
 
 The JVM doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [ICU4J](https://unicode-org.github.io/icu/userguide/icu4j/) and [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
 
-This library provides a small, zero-dependency, pure Clojure implementation of this functionality and goes further by (optionally) also taking [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) (which are also non-printing on an ANSI-capable terminal) into account.
+This library provides a small, zero-dependency-by-default, pure Clojure implementation of this functionality and goes further by (optionally) also taking [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) into account (as these are also zero width on an ANSI-capable terminal).
 
 ## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
-When supplied with a sequence of textual data (i.e. a `String` or `char[]`), `count` simply counts the number of Java `char`s in that sequence, which, due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), is not necessarily the same thing as a Unicode code point (let alone a Unicode grapheme, which is what we generally now think of when we think of a "character").  Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes are represented by two such code units (and therefore as 2 `char`s on the JVM).
+When supplied with a sequence of textual data (i.e. a `String` or `char[]`), `count` simply counts the number of Java `char`s in that sequence, which is not the same thing as a Unicode grapheme cluster (since a Unicode grapheme cluster may be made up of multiple Unicode code points).  What's worse is that due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), a Java `char` isn't even necessarily the same thing as a Unicode code point.  Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes are represented by 2 such code units (and therefore as 2 `char`s on the JVM).
 
-Furthermore, `count` doesn't account for combining, non-printing, or zero-width Unicode code points; it counts them as `char`s regardless of what a Unicode-enabled device would do with them.
+Furthermore, `count` doesn't account for combining, non-printing, or zero-width Unicode code points; it counts them as `char`s regardless of whether they get displayed on Unicode-enabled devices or not.  Similarly it has no awareness of the non-printing nature of ANSI escape codes.
 
 ## How does it work?
 
-Technically, UTR11 defines display widths for every Unicode code point, which is _not_ necessarily the same thing as a grapheme cluster (the "character" that is displayed on screen, print, etc.).  So the way this library (and [others like it](https://docs.rs/unicode-display-width/latest/unicode_display_width/)) function is to break strings up into their grapheme clusters, and then determine the width of each cluster based on the display width rules of the code point(s) that comprise that cluster, then add the cluster widths together to arrive at the string's overall display width.  In many cases this is a simple 1:1 correspondence - the [Latin character "a"](https://www.compart.com/en/unicode/U+0061), for example, is a single grapheme cluster (`a`) defined by a single code point (`U+0061`), and takes up a single display column.  At the other end of complexity, the [transgender flag emoji](https://emojipedia.org/transgender-flag#technical) is a single grapheme cluster (`🏳️‍⚧️`), defined by 5 code points (`[U+1F3F3 U+FE0F U+200D U+26A7 U+FE0F]`), and takes up 2 display columns.  It also (due to the historical Java issue mentioned above) takes up 6 (!) JVM `char`s.
+Technically, UTR11 defines display widths for every Unicode code point, which is _not_ necessarily the same thing as a grapheme cluster (a "character").  So the way this library (and [others like it](https://docs.rs/unicode-display-width/latest/unicode_display_width/)) function is to break strings up into their grapheme clusters, and then determine the width of each cluster based on the display width rules of the code point(s) that comprise that cluster, then add the cluster widths together to arrive at the string's overall display width.
+
+In many cases this is a simple 1:1 correspondence - the [Latin character "a"](https://www.compart.com/en/unicode/U+0061), for example, is a single grapheme cluster (`a`) defined by a single code point (`U+0061`), and takes up a single display column.  At the other end of complexity, the [transgender flag emoji](https://emojipedia.org/transgender-flag#technical) is a single grapheme cluster (`🏳️‍⚧️`), defined by 5 code points (`U+1F3F3 U+FE0F U+200D U+26A7 U+FE0F`), and takes up 2 display columns.  It also (due to the historical Java issue mentioned above) takes up 6 (!) JVM `char`s, further complicating the situation for Clojure developers.
 
 ## A note about JVM Unicode suppport
 
-This library fundamentally depends on being able to break strings into Unicode grapheme clusters, which the JVM supports via the `java.text.BreakIterator` class.  Unfortunately the implementation of this class tends to lag behind the latest Unicode specification, especially in JVM versions prior to 20 (see [JDK-8291660](https://bugs.openjdk.org/browse/JDK-8291660) for some specifics).  For that reason, this library will check at runtime whether the ICU4J library is on the classpath, and if so use its implementation of the BreakIterator instead of the JDK's.  This gives downstream users of the library the ability to choose whether to consume this library as lightweight, zero-dependency "best effort" functionality, or whether to introduce the (large) ICU4J library and exhibit correct behaviour across a wider range of inputs.
+This library fundamentally depends on being able to break strings into Unicode grapheme clusters, which the JVM supports via the [`java.text.BreakIterator` class](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html).  Unfortunately the implementation of this class tends to lag behind the latest Unicode specification, especially in JVM versions prior to 20 (see [JDK-8291660](https://bugs.openjdk.org/browse/JDK-8291660) for some specifics).
 
-Note that the unit tests are run using the ICU4J library, since the CI unit testing matrix includes old JVM versions (8, 11, 17) that have badly outdated `java.text.BreakIterator` implementations.
+For that reason, this library will check at runtime whether the ICU4J library is on the classpath, and if so use [its implementation of the `BreakIterator` class](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/BreakIterator.html) instead of the JDK's.  This gives downstream users of the library the ability to choose whether to consume this library in a lightweight, zero-dependency "best effort" form, or whether to introduce the (large) ICU4J library and thereby ensure correct behaviour across a wider range of esoteric Unicode inputs.
+
+Note that the unit tests are run using the ICU4J library only, since they are run on a CI matrix of JVM versions, and include some tests that are known to fail on JVM versions prior to v24.
 
 ## Installation
 
@@ -65,6 +69,7 @@ $ deps-try com.github.pmonks/clj-wcwidth
 ### Demo
 
 ```clojure
+(require '[clojure.string :as s])
 (require '[wcwidth.api :as wcw])
 
 ;; POSIX-compliant wcwidth / wcswidth
@@ -100,7 +105,7 @@ $ deps-try com.github.pmonks/clj-wcwidth
 (wcw/display-width (str "hello, " ansi-hide-cursor))
 ; ==> 7
 
-;; Examples showing why clojure.core/count doesn't work for this use case
+;; Examples showing how clojure.core/count doesn't work
 
 (def jerome (wcw/code-points-to-string [\J \e 0x0341 \r \o 0x0302 \m \e]))  ; Jérôme, using combining diacritics
 (wcw/display-width jerome)
@@ -113,6 +118,12 @@ $ deps-try com.github.pmonks/clj-wcwidth
 ; ==> 1
 (count deseret-capital-long-i)
 ; ==> 2
+
+(def lots-of-escapes (s/join (repeat 1000 ascii-esc)))
+(wcw/display-width lots-of-escapes)
+; ==> 0
+(count lots-of-escapes)
+; ==> 1000                  ; lol 🤡
 
 (def trans-flag (wcw/code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F]))  ; 🏳️‍⚧️
 (wcw/display-width trans-flag)
