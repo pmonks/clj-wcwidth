@@ -119,6 +119,12 @@ $ deps-try com.github.pmonks/clj-wcwidth
 (count deseret-capital-long-i)
 ; ==> 2
 
+(def zalgo-text "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ")
+(wcw/display-width zalgo-text)
+; ==> 9
+(count zalgo-text)
+; ==> 44                    ; lol 🤡
+
 (def lots-of-escapes (s/join (repeat 1000 ascii-esc)))
 (wcw/display-width lots-of-escapes)
 ; ==> 0
