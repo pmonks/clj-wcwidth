@@ -36,7 +36,7 @@ This library fundamentally depends on being able to break strings into Unicode g
 
 For that reason, this library will check at runtime whether the ICU4J library is on the classpath, and if so use [its implementation of the `BreakIterator` class](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/BreakIterator.html) instead of the JDK's.  This gives downstream users of the library the ability to choose whether to consume this library in a lightweight, zero-dependency, "best effort of the JVM" form, or whether to introduce the (large) ICU4J library and thereby ensure correct behaviour across a wider range of JVM versions and Unicode inputs.
 
-Note that the unit tests are run using the ICU4J library only, since they are run on a CI matrix of JVM versions, and include some tests that are known to fail on JVM versions prior to v24.
+Note that the unit tests are run using the ICU4J library only, since the CI job runs them on a matrix of JVM versions, and they include some tests that are known to fail with the JDK's `java.text.BreakIterator` class in JVM versions prior to v24.
 
 ## Installation
 
