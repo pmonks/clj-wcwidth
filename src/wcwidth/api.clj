@@ -48,16 +48,12 @@
     (let [a (.toArray (.codePoints s))]
       (when a (vec a)))))   ; Note: seq nil-puns empty sequences, and vec "empty-sequence-puns" nil, so we don't have a core fn to do exactly what we want!
 
-; On JVM v20+, using java.text.BreakIterator would be a better way to do this,
-; but older versions have poor Unicode support - see https://bugs.openjdk.org/browse/JDK-8291660
-(defn grapheme-clusters
-  "Returns the Unicode grapheme clusters in `s`, as a sequence of `String`s.
-  Returns `nil` when `s` is `nil`."
-  [^String s]
-  (when s
-    (if-let [result (re-seq #"\X" s)]
-      result
-      '())))  ; Return empty sequence when s is zero length
+; Dynamically choose an implementation for `grapheme-clusters`
+(try
+  (Class/forName "com.ibm.icu.text.BreakIterator")
+  (load "break_iterator_icu4j")
+  (catch ClassNotFoundException _
+    (load "break_iterator_jdk")))
 
 ; Copied from https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java#L104 2025-08-20
 ; That code is BSD-3-Clause
@@ -218,6 +214,7 @@
   "Returns a lazy sequence of the widths of the grapheme clusters in `s` (a
   `String`)."
   [^String s]
+  #_{:clj-kondo/ignore [:unresolved-symbol]}
   (when-let [gcs (grapheme-clusters s)]
     (map #(min 2 (apply + (map wcwidth (string-to-code-points %)))) gcs)))
 

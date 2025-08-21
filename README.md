@@ -12,19 +12,27 @@ Pure Clojure implementations of the [`wcwidth`](https://man7.org/linux/man-pages
 
 ## Why?
 
-When printing Unicode graphemes ("characters") to a fixed-width display device (e.g. a terminal), many Unicode graphemes have a well-defined "column width".  This has been standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), and implemented as the POSIX functions `wcwidth` and `wcswidth`.
+When outputing Unicode graphemes ("characters") to a fixed-width device (e.g. a terminal or monospaced editor), many have a well-defined "notional width", expressed in units of columns (where a typical ASCII character takes up 1 column).  This is partially standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), and implemented as the POSIX functions `wcwidth` and `wcswidth`.
 
 The JVM doesn't provide these functions however, so applications that need to know these widths (e.g. for terminal screen formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this themselves (notably [ICU4J](https://unicode-org.github.io/icu/userguide/icu4j/) and [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
 
-This library provides a small, zero-dependency, pure Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that. It also goes further by (optionally) also taking [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) into account.
-
-Note that this functionality relies on JVM features only availabe in JVM 11+.  It will not function on JVM 1.8.
+This library provides a small, zero-dependency, pure Clojure implementation of this functionality and goes further by (optionally) also taking [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) into account.
 
 ## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
 When supplied with a sequence of textual data (i.e. a `String` or `char[]`), `count` simply counts the number of Java `char`s in that sequence, which, due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), is not necessarily the same thing as a Unicode code point (let alone a Unicode grapheme, which is what we generally now think of when we think of a "character").  Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes are represented by two such code units (and therefore as 2 `char`s on the JVM).
 
 Furthermore, `count` doesn't account for combining, non-printing, or zero-width Unicode code points; it counts them as `char`s regardless of how a Unicode-enabled device would display them.
+
+## How does it work?
+
+Technically, UTR11 defines display widths for every Unicode code point, which is _not_ necessarily the same thing as a grapheme cluster (the "character" that is displayed on screen, print, etc.).  So the way this library (and [others like it](https://docs.rs/unicode-display-width/latest/unicode_display_width/)) function is to break strings up into their grapheme clusters, and then determine the width of each cluster based on the display width rules of the code point(s) that comprise that cluster.  In many cases this is a simple 1:1 correspondence - the ASCII character "a", for example, is a single grapheme cluster (`a`) defined by a single code point ([`U+0061`](https://www.compart.com/en/unicode/U+0061), and takes up a single display column.  At the other end of complexity, the transgender flag emoji is a single grapheme cluster (`🏳️‍⚧️`), defined by 5 code points ([`[U+1F3F3 U+FE0F U+200D U+26A7 U+FE0F]`](https://emojipedia.org/transgender-flag#technical)), and takes up 2 display columns.
+
+## A note about JVM Unicode suppport
+
+This library fundamentally depends on being able to break strings into Unicode grapheme clusters, which the JVM supports via the `java.text.BreakIterator` class.  Unfortunately the implementation of this class tends to lag behind the latest Unicode specification, especially in JVM versions prior to 20 (see [JDK-8291660](https://bugs.openjdk.org/browse/JDK-8291660) for some specifics).  For that reason, this library will check at runtime whether the ICU4J library is on the classpath, and if so use its implementation of the BreakIterator instead of the JDK's.  This gives downstream users of the library the ability to choose whether to consume this library as lightweight, zero-dependency "best effort" functionality, or whether to introduce the (large) ICU4J library and exhibit correct behaviour across a wider range of inputs.
+
+Note that the unit tests are run using the ICU4J library, since the CI unit testing matrix includes old JVM versions (8, 11, 17) that have badly outdated `java.text.BreakIterator` implementations.
 
 ## Installation
 

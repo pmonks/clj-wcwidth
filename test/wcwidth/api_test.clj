@@ -10,8 +10,12 @@
 
 (ns wcwidth.api-test
   (:require [clojure.test   :refer [deftest testing is]]
+            [clojure.string :as s]
             [wcwidth.api    :refer [code-point-to-string code-points-to-string string-to-code-points
-                                    wcwidth wcswidth display-width remove-ansi]]))
+                                    wcwidth wcswidth display-width remove-ansi grapheme-clusters-impl]]))
+
+(println "\n☔️ Running tests on Clojure" (clojure-version) "/ JVM" (System/getProperty "java.version") (str "(" (System/getProperty "java.vm.name") " v" (System/getProperty "java.vm.version") ")"))
+(println "☔️ Unicode grapheme cluster detection using" (s/upper-case (name grapheme-clusters-impl)))
 
 (def code-point-clown-emoji          0x1F921)   ; 🤡
 (def code-point-globe-asia           0x1F30F)   ; 🌏
@@ -118,13 +122,14 @@
 
   (testing "Unicode - double width"
     (is (= 2 (wcwidth code-point-clown-emoji)))
-    (is (= 2 (wcwidth 0x26AA)))    ; ⚪️
-    (is (= 2 (wcwidth 0x26AB)))    ; ⚫️
-    (is (= 2 (wcwidth 0x1F7E2)))   ; 🟢
-    (is (= 2 (wcwidth 0x2B1B)))    ; ⬛️
-    (is (= 2 (wcwidth 0x2B1C)))    ; ⬜️
-    (is (= 2 (wcwidth 0x1F7E7)))   ; 🟧
-    (is (= 2 (wcwidth 0x2B50)))))  ; ⭐️
+    (is (= 2 (wcwidth 0x26AA)))     ; ⚪️
+    (is (= 2 (wcwidth 0x26AB)))     ; ⚫️
+    (is (= 2 (wcwidth 0x1F7E2)))    ; 🟢
+    (is (= 2 (wcwidth 0x2B1B)))     ; ⬛️
+    (is (= 2 (wcwidth 0x2B1C)))     ; ⬜️
+    (is (= 2 (wcwidth 0x1F7E7)))    ; 🟧
+    (is (= 2 (wcwidth 0x2B50)))     ; ⭐️
+    (is (= 2 (wcwidth 0x1F6E1)))))  ; 🛡
 
 (deftest test-wcswidth
   (testing "nil and empty"
@@ -138,17 +143,20 @@
   (testing "Unicode - all single width"
     (is (= 28 (wcswidth "Copyright © Peter Monks 2022")))
     (is (=  1 (wcswidth (code-point-to-string  0x00E9))))        ; é
-    (is (=  1 (wcswidth (code-points-to-string [\e 0x0341])))))  ; Also é, but using combining characters
+    (is (=  1 (wcswidth (code-points-to-string [\e 0x0341])))))  ; Also é, but using combining code points
 
-  (testing "Unicode - all double width, with some non-printing as well"
-    (is (= 4 (wcswidth (code-points-to-string [0x1F44D 0x1F44D 0x1F3FB]))))               ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
-    (is (= 2 (wcswidth (code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F])))))  ; 🏳️‍⚧️
+  (testing "Unicode - graphemes with multiple code points"
+    (is (= 4 (wcswidth (code-points-to-string [0x1F44D 0x1F44D 0x1F3FB]))))               ; 👍👍🏻 - note skin tone is controlled via a zero-width combining code points
+    (is (= 2 (wcswidth (code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F])))))  ; 🏳️‍⚧️ - note trans flag is 5 combined code points stored in 6 JVM chars
 
   (testing "Unicode - mixed widths"
-    (is (=  9 (wcswidth "पीटर मोंक्सो")))
+    (is (=  9 (wcswidth "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ")))
+    (is (=  9 (wcswidth "पीटर मोंक्सो")))  ; Note: Indic scripts (like this one) don't have formally defined display widths
     (is (= 11 (wcswidth "彼得·蒙克斯")))
+    (is (= 15 (wcswidth "🔥🗡🍩👩🏻‍🚀⏰💃🏼🔦👍🏻")))
     (is (=  9 (wcswidth (str "hello, " (code-point-to-string code-point-clown-emoji)))))
-    (is (= -1 (wcswidth (str "hello, world" (code-point-to-string code-point-non-printing-example)))))))
+    (is (= -1 (wcswidth (str "hello, world" (code-point-to-string code-point-non-printing-example)))))
+    (is (= -1 (wcswidth (str (code-points-to-string [27 91 57 50 109]) "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ"))))))  ; ANSI fg colour bright green, ZalgoText
 
 (deftest test-remove-ansi
   (testing "nil, empty, blank"
@@ -158,7 +166,7 @@
   (testing "no ANSI sequences"
     (is (= "hello, world"                  (remove-ansi "hello, world")))
     (is (= (code-points-to-string [27])    (remove-ansi (code-points-to-string [27]))))      ; "Naked" ESC
-    (is (= (code-points-to-string [27 59]) (remove-ansi (code-points-to-string [27 59])))))  ; ESC;
+    (is (= (code-points-to-string [27 59]) (remove-ansi (code-points-to-string [27 59])))))  ; ESC
   (testing "ANSI sequence"
     (is (= "0123456789"   (remove-ansi (code-points-to-string [27 91 57 50 109 48 49 50 51 52 53 54 55 56 57 27 91 109])))  ; ANSI fg colour bright green, ASCI digits 0-9, ANSI fg colour reset
     (is (= "Hello World!" (remove-ansi (code-points-to-string [27 91 51 49 109 72 101 108 27 91 51 49 109 27 91 52 55 109 108 111 27 91 109 27 91 109 32 27 91 49 109 27 91 51 51 109 87 111 114 27 91 109 27 91 49 109 108 100 33 27 91 109])))))))  ; "Hello World!" with various inline formatting (FG & BG colours, attributes)
@@ -175,13 +183,15 @@
   (testing "Unicode - all single width"
     (is (= 28 (display-width "Copyright © Peter Monks 2022"))))
 
-  (testing "Unicode - all double width"
+  (testing "Unicode - graphemes with multiple code points"
     (is (= 4 (display-width (code-points-to-string [0x1F44D 0x1F44D 0x1F3FB]))))               ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
-    (is (= 2 (display-width (code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F])))))  ; 🏳️‍⚧️ - note trans flag is 5 combined code points
+    (is (= 2 (display-width (code-points-to-string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F])))))  ; 🏳️‍⚧️ - note trans flag is 5 combined code points stored in 6 JVM chars
 
   (testing "Unicode - mixed widths"
-    (is (=  9 (display-width "पीटर मोंक्सो")))
+    (is (=  9 (display-width "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ")))
+    (is (=  9 (display-width "पीटर मोंक्सो")))  ; Note: Indic scripts (like this one) don't have formally defined display widths
     (is (= 11 (display-width "彼得·蒙克斯")))
+    (is (= 15 (wcswidth "🔥🗡🍩👩🏻‍🚀⏰💃🏼🔦👍🏻")))
     (is (=  9 (display-width (str "hello, " (code-point-to-string code-point-clown-emoji)))))
     (is (= 12 (display-width (str "hello, world" (code-point-to-string code-point-non-printing-example))))))
 
@@ -191,4 +201,5 @@
       (is (= 16 (display-width string-with-ansi {:ignore-ansi? true}))))
     (let [string-with-ansi (code-points-to-string [27 91 51 49 109 72 101 108 27 91 51 49 109 27 91 52 55 109 108 111 27 91 109 27 91 109 32 27 91 49 109 27 91 51 51 109 87 111 114 27 91 109 27 91 49 109 108 100 33 27 91 109])]  ; "Hello World!" with various inline formatting (FG & BG colours, attributes)
       (is (= 12 (display-width string-with-ansi)))
-      (is (= 42 (display-width string-with-ansi {:ignore-ansi? true}))))))
+      (is (= 42 (display-width string-with-ansi {:ignore-ansi? true}))))
+    (is (= 9 (display-width (str (code-points-to-string [27 91 57 50 109]) "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ"))))))  ; ANSI fg colour bright green, ZalgoText
