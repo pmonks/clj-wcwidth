@@ -22,7 +22,7 @@ This library provides a small, zero-dependency-by-default, pure Clojure implemen
 
 When supplied with a sequence of textual data (i.e. a `String` or `char[]`), `count` simply counts the number of Java `char`s in that sequence, which is not the same thing as a Unicode grapheme cluster (since a Unicode grapheme cluster may be made up of multiple Unicode code points).  What's worse is that due to a [historical oddity of the JVM](https://www.oracle.com/technical-resources/articles/javase/supplementary.html), a Java `char` isn't even necessarily the same thing as a Unicode code point.  Specifically, Java `char`s are a 16 bit "code unit" from UTF-16, and Unicode code points in the supplementary planes are represented by 2 such code units (and therefore as 2 `char`s on the JVM).
 
-Furthermore, `count` doesn't account for combining, non-printing, or zero-width Unicode code points; it counts them as `char`s regardless of whether they get displayed on Unicode-enabled devices or not.  Similarly it has no awareness of the non-printing nature of ANSI escape codes.
+Furthermore, `count` doesn't account for combining, non-printing, or zero-width Unicode code points; it counts them as `char`s regardless of whether they get displayed on Unicode-capable devices or not.  Similarly it has no awareness of the non-printing nature of ANSI escape codes on ANSI-capable devices.
 
 ## How does it work?
 
