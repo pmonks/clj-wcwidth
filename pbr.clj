@@ -23,4 +23,6 @@
                         :developers       [:developer {:id "pmonks" :name "Peter Monks" :email "pmonks+wcwidth@gmail.com"}]
                         :scm              {:url "https://github.com/pmonks/clj-wcwidth" :connection "scm:git:git://github.com/pmonks/clj-wcwidth.git" :developer-connection "scm:git:ssh://git@github.com/pmonks/clj-wcwidth.git"}
                         :issue-management {:system "github" :url "https://github.com/pmonks/clj-wcwidth/issues"}}
-         :codox        {:metadata         {:doc/format :markdown}}))
+         :codox        {:metadata         {:doc/format :markdown}}
+         :eastwood     {:exclude-linters [:unused-ret-vals-in-try :no-ns-form-found]}
+         :test-deps    {'com.ibm.icu/icu4j {:mvn/version "77.1"}}))  ; # We test with ICU4J as it's more reliable than the JDK (especially pre v20)
