@@ -18,7 +18,7 @@ The JVM doesn't provide these functions however, so applications that need to kn
 
 This library provides a small, zero-dependency, pure Clojure implementation of the rules described in UTR-11 (and updated for recent Unicode versions), to avoid having to do that. It also goes further by (optionally) also taking [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) into account.
 
-Note that this functionality is dependent on the JVM it's running on, and prior to JVM v20, Unicode support was [notably lacking]((https://bugs.openjdk.org/browse/JDK-8291660)).
+Note that this functionality relies on JVM features only availabe in JVM 11+.  It will not function on JVM 1.8.
 
 ## Why not [`count`](https://clojuredocs.org/clojure.core/count)?
 
