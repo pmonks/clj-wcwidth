@@ -8,6 +8,7 @@
 ; SPDX-License-Identifier: MPL-2.0
 ;
 
-{:aliases
+{;:deps {com.ibm.icu/icu4j {:mvn/version "77.1"}}  ; Optional dependency - will be used if it's in the classpath
+ :aliases
    {:build {:deps       {com.github.pmonks/pbr {:mvn/version "RELEASE"}}
             :ns-default pbr.build}}}
