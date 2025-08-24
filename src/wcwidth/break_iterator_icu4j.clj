@@ -19,13 +19,15 @@
   :icu4j)
 
 (defn grapheme-clusters
-  "Returns the Unicode grapheme clusters in `s`, as a sequence of `String`s.
-  Returns `nil` when `s` is `nil`.
+  "Returns the [Unicode grapheme clusters](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)
+  (what we tend to think of as \"characters\") in `s` as a sequence of
+  `String`s, or `nil` when `s` is `nil`.
 
   Notes:
 
   * Will use [ICU4J's `BreakIterator`](https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/BreakIterator.html)
-    class when available, falling back on the [JDK's lower quality `BreakIterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html)
+    class when available on the classpath, falling back on the [JDK's lower
+    quality `BreakIterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html)
     class otherwise"
   [^String s]
   (when s
