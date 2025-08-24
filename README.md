@@ -44,7 +44,7 @@ Note that the unit tests are run using the ICU4J library only, since the CI job 
 
 ### API Documentation
 
-[API documentation is available here](https://pmonks.github.io/clj-wcwidth/).  [The unit tests](https://github.com/pmonks/clj-wcwidth/blob/release/test/wcwidth/api_test.clj) provide comprehensive usage examples.
+[API documentation is available here](https://pmonks.github.io/clj-wcwidth/wcwidth.api.html).  [The unit tests](https://github.com/pmonks/clj-wcwidth/blob/release/test/wcwidth/api_test.clj) provide comprehensive usage examples.
 
 ### Trying it Out
 
