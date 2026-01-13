@@ -25,4 +25,4 @@
                         :issue-management {:system "github" :url "https://github.com/pmonks/clj-wcwidth/issues"}}
          :codox        {:metadata         {:doc/format :markdown}}
          :eastwood     {:exclude-linters [:unused-ret-vals-in-try :no-ns-form-found]}
-         :test-deps    {'com.ibm.icu/icu4j {:mvn/version "77.1"}}))  ; # We test with ICU4J as it's more reliable than the JDK (especially pre v20)
+         :test-deps    {'com.ibm.icu/icu4j {:mvn/version "77.1"}}))  ; # We test with ICU4J as it has better Unicode spec compliance than the JDK (especially pre JVM v20).  Note: DON'T UPGRADE ICU4J PAST v77.1 - IT'S THE LAST VERSION COMPILED FOR JDK 1.8!!

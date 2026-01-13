@@ -12,6 +12,12 @@
   "The public API of [`clj-wcwidth`](https://github.com/pmonks/clj-wcwidth)."
   (:require [clojure.string :as s]))
 
+(defmacro ^:private safe-int
+  "nil-safe version of clojure.core/int"
+  [x]
+  `(when ~x
+     (int ~x)))
+
 (defn code-point->string
   "Returns the `String` representation of any Unicode `code-point`<sup>†</sup>,
   or `nil` when `code-point` is `nil`.
@@ -20,17 +26,17 @@
   support escape sequences (i.e. `\"\\uXXXX\"`) for code points in the basic
   plane; code points in the supplementary planes must be manually converted into
   their [UTF-16 surrogate pair](https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF),
-  and then each UTF-16 code unit in the pair escaped separately (tedious and
-  error prone).
+  and then each UTF-16 code unit in the pair escaped separately (which is
+  tedious and error prone).
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-point]
-  (when code-point
-    (s/join (java.lang.Character/toChars (int code-point)))))
-;    (java.lang.Character/toString code-point)))  ; Java 11+
+  ^String [code-point]
+  (when-let [cp (safe-int code-point)]
+    (s/join (java.lang.Character/toChars cp))))
+;    (java.lang.Character/toString cp)))  ; Java 11+ only
 
-(defn ^:deprecated code-point-to-string
+(defn ^:deprecated ^:no-doc code-point-to-string
   "Deprecated. Use [[code-point->string]] instead."
   [code-point]
   (code-point->string code-point))
@@ -41,22 +47,21 @@
 
   <sup>†</sup>a sequence of `char`s or `int`s, but `int`s are usually the better
   choice, because of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-points]
+  ^String [code-points]
   (when code-points
     (s/join (map code-point->string code-points))))
 
-(defn ^:deprecated code-points-to-string
+(defn ^:deprecated ^:no-doc code-points-to-string
   "Deprecated. Use [[code-points->string]] instead."
   [code-points]
   (code-points->string code-points))
 
 (defn string->code-points
-  "Returns all of the Unicode code points in `s` (a `String`), as a sequence of
-  `int`s, or `nil` when `s` is `nil`."
-  [^String s]
-  (when s
-    (let [a (.toArray (.codePoints s))]
-      (when a (vec a)))))   ; Note: seq nil-puns empty sequences, and vec "empty-sequence-puns" nil, so we don't have a core fn to do exactly what we want!
+  "Returns all of the Unicode code points in `cs` (a `CharSequence`), as a
+  sequence of `int`s, or `nil` when `s` is `nil`."
+  [^CharSequence cs]
+  (when cs
+    (sequence (.toArray (.codePoints cs)))))
 
 (defn ^:deprecated string-to-code-points
   "Deprecated. Use [[string->code-points]] instead."
@@ -125,7 +130,7 @@
 (defn- char-range-comparator
   "A comparator for comparing a code point (within a singleton vector) against a
   single range from combining-char-ranges."
-  [a b]
+  ^long [a b]
   ; We have to do these shenanigans as java.util.Collections/binarySearch assumes we're comparing identical types
   ; (which we're not, in this case, at least conceptually), and hence will hand them to us in any order.
   (let [multiplier (if (= 1 (count a)) 1         -1)
@@ -143,33 +148,32 @@
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-point]
+  ^Boolean [code-point]
   (boolean
-    (when code-point
-      (= 0x0000 (int code-point)))))
+    (when-let [cp (safe-int code-point)]
+      (= 0x0000 cp))))
 
 (defn non-printing?
   "Is `code-point`<sup>†</sup> a [non-printing character](https://en.wikipedia.org/wiki/Unicode_control_characters)?
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-point]
+  ^Boolean [code-point]
   (boolean
-    (when code-point
-      (let [cp (int code-point)]
-        (or (< cp 0x0020)
-            (and (>= cp 0x007F)
-                 (<  cp 0x00A0)))))))
+    (when-let [cp (safe-int code-point)]
+      (or (< cp 0x0020)
+          (and (>= cp 0x007F)
+               (<  cp 0x00A0))))))
 
 (defn combining?
   "Is `code-point`<sup>†</sup> a [combining character](https://en.wikipedia.org/wiki/Combining_character)?
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-point]
+  ^Boolean [code-point]
   (boolean
-    (when code-point
-      (>= (java.util.Collections/binarySearch combining-char-ranges [(int code-point)] char-range-comparator) 0))))
+    (when-let [cp (safe-int code-point)]
+      (>= (java.util.Collections/binarySearch combining-char-ranges [cp] char-range-comparator) 0))))
 
 (defn wide?
   "Is `code-point`<sup>†</sup> in the [East Asian Wide (W), East Asian Full-width
@@ -177,30 +181,29 @@
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-point]
+  ^Boolean [code-point]
   (boolean
-    (when code-point
-      (let [cp (int code-point)]
-        (and (>= cp 0x1100)
-             (or (<= cp 0x115F)                               ; Hangul Jamo init. consonants
-                 (=  cp 0x2329)                               ; Left pointing angle bracket
-                 (=  cp 0x232A)                               ; Right pointing angle bracket
-                 (and (not= cp 0x303F)                        ; CJK ... Yi
-                      (>= cp 0x2E80)  (<= cp 0xA4CF))
-                 (and (>= cp 0xAC00)  (<= cp 0xD7A3))         ; Hangul Syllables
-                 (and (>= cp 0xF900)  (<= cp 0xFAFF))         ; CJK Compatibility Ideographs
-                 (and (>= cp 0xFE10)  (<= cp 0xFE19))         ; Vertical forms
-                 (and (>= cp 0xFE30)  (<= cp 0xFE6F))         ; CJK Compatibility Forms
-                 (and (>= cp 0xFF00)  (<= cp 0xFF60))         ; Fullwidth Forms
-                 (and (>= cp 0xFFE0)  (<= cp 0xFFE6))         ; Fullwidth Forms
-                 (and (>= cp 0x2B1B)  (<= cp 0x2B1C))         ; Black and white large squares
-                 (= cp 0x2B50)                                ; White medium star
-                 (= cp 0x2B55)                                ; Heavy large circle
-                 (and (>= cp 0x2600)  (<= cp 0x27BF))         ; Miscellaneous symbols
-                 (and (>= cp 0x1F000) (<= cp 0x1FEEE)         ; Emoji
-                      (not (combining? cp)))
-                 (and (>= cp 0x20000) (<= cp 0x2FFFD))        ; CJK Unified Ideographs Extension B
-                 (and (>= cp 0x30000) (<= cp 0x3FFFD))))))))  ; CJK Symbols and Punctuation
+    (when-let [cp (safe-int code-point)]
+      (and (>= cp 0x1100)
+           (or (<= cp 0x115F)                              ; Hangul Jamo init. consonants
+               (=  cp 0x2329)                              ; Left pointing angle bracket
+               (=  cp 0x232A)                              ; Right pointing angle bracket
+               (and (not= cp 0x303F)                       ; CJK ... Yi
+                    (>= cp 0x2E80)  (<= cp 0xA4CF))
+               (and (>= cp 0xAC00)  (<= cp 0xD7A3))        ; Hangul Syllables
+               (and (>= cp 0xF900)  (<= cp 0xFAFF))        ; CJK Compatibility Ideographs
+               (and (>= cp 0xFE10)  (<= cp 0xFE19))        ; Vertical forms
+               (and (>= cp 0xFE30)  (<= cp 0xFE6F))        ; CJK Compatibility Forms
+               (and (>= cp 0xFF00)  (<= cp 0xFF60))        ; Fullwidth Forms
+               (and (>= cp 0xFFE0)  (<= cp 0xFFE6))        ; Fullwidth Forms
+               (and (>= cp 0x2B1B)  (<= cp 0x2B1C))        ; Black and white large squares
+               (= cp 0x2B50)                               ; White medium star
+               (= cp 0x2B55)                               ; Heavy large circle
+               (and (>= cp 0x2600)  (<= cp 0x27BF))        ; Miscellaneous symbols
+               (and (>= cp 0x1F000) (<= cp 0x1FEEE)        ; Emoji
+                    (not (combining? cp)))
+               (and (>= cp 0x20000) (<= cp 0x2FFFD))       ; CJK Unified Ideographs Extension B
+               (and (>= cp 0x30000) (<= cp 0x3FFFD)))))))  ; CJK Symbols and Punctuation
 
 (defn wcwidth
   "Returns the number of columns needed to represent the `code-point`
@@ -212,52 +215,51 @@
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
-  [code-point]
-  (if code-point
-    (let [cp (int code-point)]
-      (cond
-        (null?         cp)  0
-        (non-printing? cp) -1
-        (combining?    cp)  0
-        (wide?         cp)  2
-        :else               1))
+  ^long [code-point]
+  (if-let [cp (safe-int code-point)]
+    (cond
+      (null?         cp)  0
+      (non-printing? cp) -1
+      (combining?    cp)  0
+      (wide?         cp)  2
+      :else               1)
     0))
 
 (defn- grapheme-cluster-widths
-  "Returns a sequence of the [[wcwidth]]s of the grapheme clusters in `s` (a
-  `String`)."
-  [^String s]
+  "Returns a sequence of the [[wcwidth]]s of the grapheme clusters in `cs` (a
+  `CharSequence`)."
+  [^CharSequence cs]
   #_{:clj-kondo/ignore [:unresolved-symbol]}
-  (when-let [gcs (grapheme-clusters s)]
+  (when-let [gcs (grapheme-clusters cs)]
     (map #(min 2 (reduce + (map wcwidth (string->code-points %)))) gcs)))
 
 (defn wcswidth
-  "Returns the number of columns needed to represent `s` (a `String`). If a
-  non-printing code point occurs in `s`, `-1` is returned (as defined in POSIX).
+  "Returns the number of columns needed to represent `cs` (a `CharSequence`). If
+  a non-printing code point occurs in `cs`, `-1` is returned (as defined in
+  POSIX).
 
   Returns `0` when `s` is `nil`."
-  [^String s]
-  (if s
-    (let [gcws (grapheme-cluster-widths s)]
-      (if (some #{-1} gcws)
-        -1
-        (reduce + gcws)))
+  ^long [^CharSequence cs]
+  (if-let [gcws (grapheme-cluster-widths cs)]
+    (if (some #{-1} gcws)
+      -1
+      (reduce + gcws))
     0))
 
 (def re-ansi
   "A regular expression for matching ANSI escape sequences in a larger text.
-  Taken directly from [ECMA-48](https://www.ecma-international.org/publications-and-standards/standards/ecma-48/)."
-  #"(\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
+  Adapted from [ECMA-48](https://www.ecma-international.org/publications-and-standards/standards/ecma-48/)."
+  #"(?:\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
 
 (defn remove-ansi
-  "Strips all ANSI escape sequences from `s` (a `String`).  Returns `nil` if `s`
-  is `nil`."
-  [^String s]
-  (when s
-    (s/replace s re-ansi "")))
+  "Strips all ANSI escape sequences from `cs` (a `CharSequence`).  Returns `nil`
+  if `cs` is `nil`."
+  ^String [^CharSequence cs]
+  (when cs
+    (s/replace cs re-ansi "")))
 
 (defn display-width
-  "Returns the number of columns needed to display `s` (a `String`), but
+  "Returns the number of columns needed to display `cs` (a `CharSequence`), but
   deviates from POSIX [[wcswidth]] behaviour in these ways:
 
   * non-printing characters are considered zero width (instead of causing the
@@ -268,10 +270,9 @@
   For most use cases, this function is more useful than [[wcswidth]], despite
   not adhering to POSIX.
 
-  Returns `0` when `s` is `nil`."
-  ([^String s] (display-width s nil))
-  ([^String s & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
-   (if s
-     (let [s (if ignore-ansi? s (remove-ansi s))]
-       (reduce + (remove #(<= % 0) (grapheme-cluster-widths s))))
+  Returns `0` when `cs` is `nil`."
+  (^Long [^CharSequence cs] (display-width cs nil))
+  (^Long [^CharSequence cs & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
+   (if-let [s (if ignore-ansi? cs (remove-ansi cs))]
+     (reduce + (remove neg? (grapheme-cluster-widths s)))
      0)))
