@@ -236,17 +236,16 @@
 
   Returns `0` when `s` is `nil`."
   [^String s]
-  (if s
-    (let [gcws (grapheme-cluster-widths s)]
-      (if (some #{-1} gcws)
-        -1
-        (reduce + gcws)))
+  (if-let [gcws (grapheme-cluster-widths s)]
+    (if (some #{-1} gcws)
+      -1
+      (reduce + gcws))
     0))
 
 (def re-ansi
   "A regular expression for matching ANSI escape sequences in a larger text.
-  Taken directly from [ECMA-48](https://www.ecma-international.org/publications-and-standards/standards/ecma-48/)."
-  #"(\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
+  Adapted from from [ECMA-48](https://www.ecma-international.org/publications-and-standards/standards/ecma-48/)."
+  #"(?:\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
 
 (defn remove-ansi
   "Strips all ANSI escape sequences from `s` (a `String`).  Returns `nil` if `s`
@@ -270,7 +269,6 @@
   Returns `0` when `s` is `nil`."
   ([^String s] (display-width s nil))
   ([^String s & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
-   (if s
-     (let [s (if ignore-ansi? s (remove-ansi s))]
-       (reduce + (remove #(<= % 0) (grapheme-cluster-widths s))))
+   (if-let [s (if ignore-ansi? s (remove-ansi s))]
+     (reduce + (remove #(<= % 0) (grapheme-cluster-widths s)))
      0)))
