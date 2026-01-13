@@ -20,8 +20,8 @@
 
 (defn grapheme-clusters
   "Returns the [Unicode grapheme clusters](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)
-  (what we tend to think of as \"characters\") in `s` as a sequence of
-  `String`s, or `nil` when `s` is `nil`.
+  (what we tend to think of as \"characters\") in `cs` (a `CharSequence`) as a
+  sequence of `String`s, or `nil` when `s` is `nil`.
 
   Notes:
 
@@ -29,13 +29,13 @@
     class when available on the classpath, falling back on the [JDK's lower
     quality `BreakIterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html)
     class otherwise"
-  [^String s]
-  (when s
+  [^CharSequence cs]
+  (when cs
     (let [bi (doto (com.ibm.icu.text.BreakIterator/getCharacterInstance)
-                   (.setText s))]
+                   (.setText cs))]   ; ICU4J's BreakIterator _does_ support CharSequences directly (unlike the JDK's)
       (loop [start  0
              end    (.next bi)
              result []]
         (if (= end com.ibm.icu.text.BreakIterator/DONE)
           result
-          (recur end (.next bi) (conj result (subs s start end))))))))
+          (recur end (.next bi) (conj result (.toString (.subSequence cs start end)))))))))  ; We can't use clojure.core/subs here, since it doesn't support CharSequences - see https://ask.clojure.org/index.php/14889/clojure-core-subs-should-use-type-hints-charsequence-string

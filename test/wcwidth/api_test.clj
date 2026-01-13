@@ -60,6 +60,10 @@
     (is (nil? (string->code-points nil)))
     (is (= [] (string->code-points ""))))
 
+  (testing "Other CharSequence inputs"
+    (is (= []       (string->code-points (StringBuilder.))))
+    (is (= [0x0041] (string->code-points (StringBuilder. "A")))))
+
   (testing "ASCII code point"
     (is (= [0x0020] (string->code-points " ")))
     (is (= [0x0023] (string->code-points "#" )))
@@ -138,6 +142,10 @@
     (is (zero? (wcswidth nil)))
     (is (zero? (wcswidth ""))))
 
+  (testing "Other CharSequence inputs"
+    (is (zero? (wcswidth (StringBuilder.))))
+    (is (= 3   (wcswidth (StringBuilder. "foo")))))
+
   (testing "ASCII-only strings"
     (is (=  3 (wcswidth "foo")))
     (is (= 12 (wcswidth "hello, world"))))
@@ -166,10 +174,13 @@
     (is (nil?            (remove-ansi nil)))
     (is (= ""            (remove-ansi "")))
     (is (= "  \t \n \r " (remove-ansi "  \t \n \r "))))
+
   (testing "no ANSI sequences"
-    (is (= "hello, world"                  (remove-ansi "hello, world")))
+    (is (= "hello, world"                (remove-ansi "hello, world")))
+    (is (= "hello, world"                (remove-ansi (StringBuilder. "hello, world"))))
     (is (= (code-points->string [27])    (remove-ansi (code-points->string [27]))))      ; "Naked" ESC
     (is (= (code-points->string [27 59]) (remove-ansi (code-points->string [27 59])))))  ; ESC
+
   (testing "ANSI sequence"
     (is (= "0123456789"   (remove-ansi (code-points->string [27 91 57 50 109 48 49 50 51 52 53 54 55 56 57 27 91 109])))  ; ANSI fg colour bright green, ASCI digits 0-9, ANSI fg colour reset
     (is (= "Hello World!" (remove-ansi (code-points->string [27 91 51 49 109 72 101 108 27 91 51 49 109 27 91 52 55 109 108 111 27 91 109 27 91 109 32 27 91 49 109 27 91 51 51 109 87 111 114 27 91 109 27 91 49 109 108 100 33 27 91 109])))))))  ; "Hello World!" with various inline formatting (FG & BG colours, attributes)
@@ -178,6 +189,10 @@
   (testing "nil and empty"
     (is (zero? (display-width nil)))
     (is (zero? (display-width ""))))
+
+  (testing "Other CharSequence inputs"
+    (is (zero? (display-width (StringBuilder.))))
+    (is (= 3   (display-width (StringBuilder. "foo")))))
 
   (testing "ASCII-only strings"
     (is (=  3 (display-width "foo")))

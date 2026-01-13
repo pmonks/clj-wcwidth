@@ -22,8 +22,8 @@
 #_{:clj-kondo/ignore [:redefined-var]}
 (defn grapheme-clusters
   "Returns the [Unicode grapheme clusters](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)
-  (what we tend to think of as \"characters\") in `s` as a sequence of
-  `String`s, or `nil` when `s` is `nil`.
+  (what we tend to think of as \"characters\") in `cs` (a `CharSequence`) as a
+  sequence of `String`s, or `nil` when `s` is `nil`.
 
   Notes:
 
@@ -31,9 +31,10 @@
     class when available on the classpath, falling back on the [JDK's lower
     quality `BreakIterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/BreakIterator.html)
     class otherwise"
-  [^String s]
-  (when s
-    (let [bi (doto (java.text.BreakIterator/getCharacterInstance)
+  [^CharSequence cs]
+  (when cs
+    (let [s  (.toString cs)  ; For some dumb reason the JDK's BreakIterator doesn't support CharSequences directly (unlike ICU4J)
+          bi (doto (java.text.BreakIterator/getCharacterInstance)
                    (.setText s))]
       (loop [start  0
              end    (.next bi)
