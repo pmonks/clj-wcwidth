@@ -55,8 +55,7 @@
   `int`s, or `nil` when `s` is `nil`."
   [^String s]
   (when s
-    (let [a (.toArray (.codePoints s))]
-      (when a (vec a)))))   ; Note: seq nil-puns empty sequences, and vec "empty-sequence-puns" nil, so we don't have a core fn to do exactly what we want!
+    (sequence (.toArray (.codePoints s)))))
 
 (defn ^:deprecated string-to-code-points
   "Deprecated. Use [[string->code-points]] instead."

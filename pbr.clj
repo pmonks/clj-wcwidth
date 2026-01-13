@@ -25,4 +25,4 @@
                         :issue-management {:system "github" :url "https://github.com/pmonks/clj-wcwidth/issues"}}
          :codox        {:metadata         {:doc/format :markdown}}
          :eastwood     {:exclude-linters [:unused-ret-vals-in-try :no-ns-form-found]}
-         :test-deps    {'com.ibm.icu/icu4j {:mvn/version "78.2"}}))  ; # We test with ICU4J as it's more reliable than the JDK (especially pre v20)
+         :test-deps    {'com.ibm.icu/icu4j {:mvn/version "77.1"}}))  ; # We test with ICU4J as it's more reliable than the JDK (especially pre v20).  Note: DON'T UPGRADE PAST v77.1 OR THE TESTS WILL FAIL ON JDK 1.8!!
