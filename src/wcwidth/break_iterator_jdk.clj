@@ -23,7 +23,7 @@
 (defn grapheme-clusters
   "Returns the [Unicode grapheme clusters](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)
   (what we tend to think of as \"characters\") in `cs` (a `CharSequence`) as a
-  sequence of `String`s, or `nil` when `s` is `nil`.
+  sequence of `String`s, or `nil` when `cs` is `nil`.
 
   Notes:
 

@@ -58,12 +58,12 @@
 
 (defn string->code-points
   "Returns all of the Unicode code points in `cs` (a `CharSequence`), as a
-  sequence of `int`s, or `nil` when `s` is `nil`."
+  sequence of `int`s, or `nil` when `cs` is `nil`."
   [^CharSequence cs]
   (when cs
     (sequence (.toArray (.codePoints cs)))))
 
-(defn ^:deprecated string-to-code-points
+(defn ^:deprecated ^:no-doc string-to-code-points
   "Deprecated. Use [[string->code-points]] instead."
   [s]
   (string->code-points s))
@@ -229,7 +229,6 @@
   "Returns a sequence of the [[wcwidth]]s of the grapheme clusters in `cs` (a
   `CharSequence`)."
   [^CharSequence cs]
-  #_{:clj-kondo/ignore [:unresolved-symbol]}
   (when-let [gcs (grapheme-clusters cs)]
     (map #(min 2 (reduce + (map wcwidth (string->code-points %)))) gcs)))
 
@@ -238,7 +237,7 @@
   a non-printing code point occurs in `cs`, `-1` is returned (as defined in
   POSIX).
 
-  Returns `0` when `s` is `nil`."
+  Returns `0` when `cs` is `nil`."
   ^long [^CharSequence cs]
   (if-let [gcws (grapheme-cluster-widths cs)]
     (if (some #{-1} gcws)
