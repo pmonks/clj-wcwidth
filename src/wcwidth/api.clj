@@ -28,7 +28,7 @@
   [code-point]
   (when code-point
     (s/join (java.lang.Character/toChars (int code-point)))))
-;    (java.lang.Character/toString code-point)))  ; Java 11+
+;    (java.lang.Character/toString (int code-point))))  ; Java 11+ only
 
 (defn ^:deprecated code-point-to-string
   "Deprecated. Use [[code-point->string]] instead."
