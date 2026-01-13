@@ -63,7 +63,7 @@
   (when cs
     (sequence (.toArray (.codePoints cs)))))
 
-(defn ^:deprecated string-to-code-points
+(defn ^:deprecated ^:no-doc string-to-code-points
   "Deprecated. Use [[string->code-points]] instead."
   [s]
   (string->code-points s))
