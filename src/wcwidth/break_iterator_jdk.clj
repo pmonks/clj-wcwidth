@@ -41,4 +41,4 @@
              result []]
         (if (= end java.text.BreakIterator/DONE)
           result
-          (recur end (.next bi) (conj result (subs s start end))))))))
+          (recur end (.next bi) (conj result (.toString (.subSequence s start end)))))))))
