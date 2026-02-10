@@ -68,6 +68,15 @@
   [s]
   (string->code-points s))
 
+(defn print-code-points
+  "Prints the code points in `cs` (a `CharSequence`) in normative Unicode
+  notation (`U+codepoint`) to stdout, returning `nil`.  This is primarily
+  intended to be a convenience at the REPL."
+  [^CharSequence cs]
+  (println (s/join " "
+                   (map (partial format "U+%04X")
+                        (string->code-points cs)))))
+
 ; Dynamically choose an implementation for `grapheme-clusters`
 (try
   (Class/forName "com.ibm.icu.text.BreakIterator")
