@@ -254,12 +254,12 @@
       (reduce + gcws))
     0))
 
-(def re-ansi
+(def ^:no-doc re-ansi
   "A regular expression for matching ANSI escape sequences in a larger text.
   Adapted from [ECMA-48](https://www.ecma-international.org/publications-and-standards/standards/ecma-48/)."
   #"(?:\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]")
 
-(defn remove-ansi
+(defn ^:no-doc remove-ansi
   "Strips all ANSI escape sequences from `cs` (a `CharSequence`).  Returns `nil`
   if `cs` is `nil`."
   ^String [^CharSequence cs]

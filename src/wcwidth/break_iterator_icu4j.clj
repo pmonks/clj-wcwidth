@@ -11,7 +11,7 @@
 (in-ns 'wcwidth.api)
 
 
-(def grapheme-clusters-impl
+(def ^:no-doc grapheme-clusters-impl
   "Which implementation is in use for finding grapheme clusters?  A keyword
   with one of these values:
 
