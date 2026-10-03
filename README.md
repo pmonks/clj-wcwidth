@@ -12,7 +12,7 @@ Pure Clojure implementations of the `wcwidth` and `wcswidth` POSIX functions, pl
 
 ## Why?
 
-When Unicode text is sent to a Unicode-capable fixed-width device (e.g. a terminal, monospaced printer, etc.), the "characters" that make up that text each have a well-defined "notional width" of either 0, 1, or 2 columns (where a typical ASCII character takes up 1 column).  This is standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), and implemented as the POSIX C functions [`wcwidth`](https://manpages.org/wcwidth) and [`wcswidth`](https://manpages.org/wcswidth).  The JVM doesn't provide these functions however, so applications that need to know these display widths (e.g. for terminal output formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this (notably [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
+When Unicode text is sent to a Unicode-capable fixed-width device (e.g. a terminal, monospaced printer, etc.), most of the "characters" that make up that text each have a well-defined "notional width" of either 0, 1, or 2 columns (where a typical ASCII character takes up 1 column).  This is standardised in [Unicode Technical Report #11](https://www.unicode.org/reports/tr11/), and implemented as the POSIX C functions [`wcwidth`](https://manpages.org/wcwidth) and [`wcswidth`](https://manpages.org/wcswidth).  The JVM doesn't provide these functions however, so applications that need to know these display widths (e.g. for terminal output formatting purposes) are left to their own devices.  While there are Java libraries that have implemented this (notably [JLine](https://github.com/jline/jline3/blob/master/terminal/src/main/java/org/jline/utils/WCWidth.java)), pulling in a large dependency when one only uses a very small part of it is sometimes overkill.
 
 `clj-wcwidth` provides a small, zero-dependency-by-default, pure Clojure implementation of this functionality (and more).
 
@@ -20,7 +20,7 @@ When Unicode text is sent to a Unicode-capable fixed-width device (e.g. a termin
 
 This library addresses various inconveniences in both POSIX and JLine:
 
-* The POSIX `wcswidth` function returns `-1` if a string contains any non-printing characters.  In practice this means that Unicode text needs to be pre-processed before being passed to this function.
+* The POSIX `wcswidth` function returns `-1` if a string contains any non-printing (control) characters.  In practice this means that Unicode text needs to be pre-processed before being passed to this function.
 * JLine only provides an equivalent of `wcwidth` (the POSIX function that returns the display width of a single code point), but what we think of as a "character" is actually a ["Unicode grapheme cluster"](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries) and critically, [many grapheme clusters (especially emoji) are made up of _multiple_ code points](https://emojipedia.org/emoji-zwj-sequence).
 * Neither POSIX nor JLine take [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) into account, yet these sequences are zero width on an ANSI-capable device.
 
@@ -136,11 +136,23 @@ $ deps-try com.github.pmonks/clj-wcwidth
 (count lots-of-escapes)
 ; ==> 1000                  ; lol 🤡
 
+(def shield (wcw/code-points->string [0x1F6E1 0xFE0F]))  ; 🛡️
+(wcw/display-width shield)
+; ==> 2
+(count shield)
+; ==> 3                     ; lol 🤡
+
 (def transgender-flag (wcw/code-points->string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F]))  ; 🏳️‍⚧️
 (wcw/display-width transgender-flag)
 ; ==> 2
 (count transgender-flag)
 ; ==> 6                     ; lol 🤡
+
+(def kiss-woman-woman-dark-skin-tone (wcw/code-points->string [0x1F469 0x1F3FF 0x200D 0x2764 0xFE0F 0x200D 0x1F48B 0x200D 0x1F469 0x1F3FF]))  ; 👩🏿‍❤️‍💋‍👩🏿
+(wcw/display-width kiss-woman-woman-dark-skin-tone)
+; ==> 2
+(count kiss-woman-woman-dark-skin-tone)
+; ==> 15                    ; lol 🤡
 ```
 
 ## Contributor Information

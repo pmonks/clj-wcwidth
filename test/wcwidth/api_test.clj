@@ -134,8 +134,10 @@
     (is (= 2 (wcwidth 0x2B1B)))     ; ⬛️
     (is (= 2 (wcwidth 0x2B1C)))     ; ⬜️
     (is (= 2 (wcwidth 0x1F7E7)))    ; 🟧
-    (is (= 2 (wcwidth 0x2B50)))     ; ⭐️
-    (is (= 2 (wcwidth 0x1F6E1)))))  ; 🛡
+    (is (= 2 (wcwidth 0x2B50))))    ; ⭐️
+
+  (testing "Unicode - double width, but missing Vs16"
+    (is (= 1 (wcwidth 0x1F6E1)))))  ; 🛡, without Vs16 (U+1F6E1 by itself is technically invalid)
 
 (deftest test-wcswidth
   (testing "nil and empty"
@@ -156,13 +158,21 @@
     (is (=  1 (wcswidth (code-points->string [\e 0x0341])))))  ; Also é, but using combining code points
 
   (testing "Unicode - graphemes with multiple code points"
-    (is (= 4 (wcswidth (code-points->string [0x1F44D 0x1F44D 0x1F3FB]))))               ; 👍👍🏻 - note skin tone is controlled via a zero-width combining code points
-    (is (= 2 (wcswidth (code-points->string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F])))))  ; 🏳️‍⚧️ - note trans flag is 5 combined code points stored in 6 JVM chars
+    (is (= 4 (wcswidth (code-points->string [0x1F44D 0x1F44D 0x1F3FB]))))                                                      ; 👍👍🏻 - note skin tone is controlled via a zero-width combining code points
+    (is (= 2 (wcswidth (code-points->string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F]))))                                          ; 🏳️‍⚧️ - 5 code points / 6 JVM chars
+    (is (= 2 (wcswidth (code-points->string [0x1F469 0x1F3FF 0x200D 0x2764 0xFE0F 0x200D 0x1F48B 0x200D 0x1F469 0x1F3FF])))))  ; 👨🏿‍❤️‍💋‍👨🏿 - 10 code points / 15 JVM chars
 
   (testing "Unicode - mixed widths"
+    (is (=  1 (wcswidth (code-points->string [0x2639]))))          ; ☹
+    (is (=  2 (wcswidth (code-points->string [0x2639 0xFE0F]))))   ; ☹️
+    (is (=  1 (wcswidth (code-points->string [0x00A9]))))          ; ©
+    (is (=  2 (wcswidth (code-points->string [0x00A9 0xFE0F]))))   ; ©️
+    (is (=  1 (wcswidth (code-points->string [0x1F6E1]))))         ; 🛡, without Vs16 (U+1F6E1 by itself is technically invalid)
+    (is (=  2 (wcswidth (code-points->string [0x1F6E1 0xFE0F]))))  ; 🛡, with Vs16
     (is (=  9 (wcswidth "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ")))
     (is (=  9 (wcswidth "पीटर मोंक्सो")))  ; Note: Indic scripts (like this one) don't have formally defined display widths
     (is (= 11 (wcswidth "彼得·蒙克斯")))
+    (is (= 17 (wcswidth "슬라바 우크라이나")))
     (is (= 15 (wcswidth "🔥🗡🍩👩🏻‍🚀⏰💃🏼🔦👍🏻")))
     (is (=  9 (wcswidth (str "hello, " (code-point->string code-point-clown-emoji)))))
     (is (= -1 (wcswidth invalid-grapheme-with-non-printing)))
@@ -202,13 +212,21 @@
     (is (= 28 (display-width "Copyright © Peter Monks 2022"))))
 
   (testing "Unicode - graphemes with multiple code points"
-    (is (= 4 (display-width (code-points->string [0x1F44D 0x1F44D 0x1F3FB]))))               ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
-    (is (= 2 (display-width (code-points->string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F])))))  ; 🏳️‍⚧️ - note trans flag is 5 combined code points stored in 6 JVM chars
+    (is (= 4 (display-width (code-points->string [0x1F44D 0x1F44D 0x1F3FB]))))                                                      ; 👍👍🏻 - note skin tone is controlled via a zero-width combining character
+    (is (= 2 (display-width (code-points->string [0x1F3F3 0xFE0F 0x200D 0x26A7 0xFE0F]))))                                          ; 🏳️‍⚧️ - 5 code points / 6 JVM chars
+    (is (= 2 (display-width (code-points->string [0x1F469 0x1F3FF 0x200D 0x2764 0xFE0F 0x200D 0x1F48B 0x200D 0x1F469 0x1F3FF])))))  ; 👨🏿‍❤️‍💋‍👨🏿 - 10 code points / 15 JVM chars
 
   (testing "Unicode - mixed widths"
+    (is (=  1 (display-width (code-points->string [0x2639]))))          ; ☹
+    (is (=  2 (display-width (code-points->string [0x2639 0xFE0F]))))   ; ☹️
+    (is (=  1 (display-width (code-points->string [0x00A9]))))          ; ©
+    (is (=  2 (display-width (code-points->string [0x00A9 0xFE0F]))))   ; ©️
+    (is (=  1 (display-width (code-points->string [0x1F6E1]))))         ; 🛡, without Vs16 (U+1F6E1 by itself is technically invalid)
+    (is (=  2 (display-width (code-points->string [0x1F6E1 0xFE0F]))))  ; 🛡, with Vs16
     (is (=  9 (display-width "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ")))
     (is (=  9 (display-width "पीटर मोंक्सो")))  ; Note: Indic scripts (like this one) don't have formally defined display widths
     (is (= 11 (display-width "彼得·蒙克斯")))
+    (is (= 17 (display-width "슬라바 우크라이나")))
     (is (= 15 (display-width "🔥🗡🍩👩🏻‍🚀⏰💃🏼🔦👍🏻")))
     (is (=  2 (display-width invalid-grapheme-with-non-printing)))
     (is (= 12 (display-width (str "hello, world" (code-point->string code-point-non-printing-example))))))
@@ -220,4 +238,5 @@
     (let [string-with-ansi (code-points->string [27 91 51 49 109 72 101 108 27 91 51 49 109 27 91 52 55 109 108 111 27 91 109 27 91 109 32 27 91 49 109 27 91 51 51 109 87 111 114 27 91 109 27 91 49 109 108 100 33 27 91 109])]  ; "Hello World!" with various inline formatting (FG & BG colours, attributes)
       (is (= 12 (display-width string-with-ansi)))
       (is (= 42 (display-width string-with-ansi {:ignore-ansi? true}))))
+    (is (= 2 (display-width (str (code-points->string [27 91 57 50 109 0x1F469 0x1F3FF 0x200D 0x2764 0xFE0F 0x200D 0x1F48B 0x200D 0x1F469 0x1F3FF])))))  ; ANSI fg colour bright green, 👨🏿‍❤️‍💋‍👨🏿
     (is (= 9 (display-width (str (code-points->string [27 91 57 50 109]) "Ẓ̌á̲l͔̝̞̄̑͌g̖̘̘̔̔͢͞͝o̪̔T̢̙̫̈̍͞e̬͈͕͌̏͑x̺̍ṭ̓̓ͅ"))))))  ; ANSI fg colour bright green, ZalgoText
