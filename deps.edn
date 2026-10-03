@@ -9,6 +9,14 @@
 ;
 
 {;:deps {com.ibm.icu/icu4j {:mvn/version "77.1"}}  ; Optional dependency - will be used if it's in the classpath
+ :paths ["src" "resources"]
  :aliases
    {:build {:deps       {com.github.pmonks/pbr {:mvn/version "RELEASE"}}
-            :ns-default pbr.build}}}
+            :ns-default pbr.build}
+
+    ; Update EDN resource files with `clojure -J--enable-native-access=ALL-UNNAMED -M:ucd-download`
+    :ucd-download  {:paths      ["tools/ucd-download/src"]
+                    :deps       {com.github.pmonks/urlocal {:mvn/version "RELEASE"}
+                                 com.github.pmonks/spinner {:mvn/version "RELEASE"}
+                                 org.jline/jansi           {:mvn/version "RELEASE"}}
+                    :main-opts ["-m" "ucd-download.main" "resources"]}}}

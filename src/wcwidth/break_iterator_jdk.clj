@@ -11,7 +11,7 @@
 (in-ns 'wcwidth.api)
 
 #_{:clj-kondo/ignore [:redefined-var]}
-(def grapheme-clusters-impl
+(def ^:no-doc grapheme-clusters-impl
   "Which implementation is in use for finding grapheme clusters?  A keyword
   with one of these values:
 
@@ -41,4 +41,4 @@
              result []]
         (if (= end java.text.BreakIterator/DONE)
           result
-          (recur end (.next bi) (conj result (subs s start end))))))))
+          (recur end (.next bi) (conj result (.toString (.subSequence s start end)))))))))

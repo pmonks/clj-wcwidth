@@ -17,12 +17,13 @@
          :prod-branch  "release"
          :write-pom    true
          :validate-pom true
-         :pom          {:description      "Pure Clojure implementations of wcwidth/wcswidth."
-                        :url              "https://github.com/pmonks/clj-wcwidth"
-                        :licenses         [:license   {:name "MPL-2.0" :url "https://www.mozilla.org/en-US/MPL/2.0/"}]
-                        :developers       [:developer {:id "pmonks" :name "Peter Monks" :email "pmonks+wcwidth@gmail.com"}]
-                        :scm              {:url "https://github.com/pmonks/clj-wcwidth" :connection "scm:git:git://github.com/pmonks/clj-wcwidth.git" :developer-connection "scm:git:ssh://git@github.com/pmonks/clj-wcwidth.git"}
-                        :issue-management {:system "github" :url "https://github.com/pmonks/clj-wcwidth/issues"}}
-         :codox        {:metadata         {:doc/format :markdown}}
-         :eastwood     {:exclude-linters [:unused-ret-vals-in-try :no-ns-form-found]}
+         :pom          {:description       "Pure Clojure implementations of wcwidth/wcswidth."
+                        :url               "https://github.com/pmonks/clj-wcwidth"
+                        :licenses          [:license   {:name "MPL-2.0" :url "https://www.mozilla.org/en-US/MPL/2.0/"}]
+                        :developers        [:developer {:id "pmonks" :name "Peter Monks" :email "pmonks+wcwidth@gmail.com"}]
+                        :scm               {:url "https://github.com/pmonks/clj-wcwidth" :connection "scm:git:git://github.com/pmonks/clj-wcwidth.git" :developer-connection "scm:git:ssh://git@github.com/pmonks/clj-wcwidth.git"}
+                        :issue-management  {:system "github" :url "https://github.com/pmonks/clj-wcwidth/issues"}}
+         :codox        {:namespaces        ['wcwidth.api]
+                        :metadata          {:doc/format :markdown}}
+         :eastwood     {:exclude-linters   [:unused-ret-vals-in-try :no-ns-form-found]}
          :test-deps    {'com.ibm.icu/icu4j {:mvn/version "77.1"}}))  ; # We test with ICU4J as it has better Unicode spec compliance than the JDK (especially pre JVM v20).  Note: DON'T UPGRADE ICU4J PAST v77.1 - IT'S THE LAST VERSION COMPILED FOR JDK 1.8!!

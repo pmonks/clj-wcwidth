@@ -10,15 +10,13 @@
 
 (in-ns 'wcwidth.api)
 
-
-(def grapheme-clusters-impl
+(def ^:no-doc grapheme-clusters-impl
   "Which implementation is in use for finding grapheme clusters?  A keyword
   with one of these values:
 
   * `:icu4j`
   * `:jdk`"
   :icu4j)
-
 
 (defn grapheme-clusters
   "Returns the [Unicode grapheme clusters](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries)
