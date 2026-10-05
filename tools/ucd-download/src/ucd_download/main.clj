@@ -9,7 +9,7 @@
 ;
 
 (ns ucd-download.main
-  "Entry point for the UCD loader command line utility."
+  "Entry point for the UCD download command line utility."
   (:require [clojure.string         :as s]
             [clojure.pprint         :as pp]
             [clojure.java.io        :as io]

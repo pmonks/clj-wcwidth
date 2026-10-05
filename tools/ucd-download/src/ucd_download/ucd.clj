@@ -9,7 +9,7 @@
 ;
 
 (ns ucd-download.ucd
-  "UCD data retrieval."
+  "UCD data download functions."
   (:require [clojure.string  :as s]
             [clojure.java.io :as io]
             [urlocal.api     :as url]))
