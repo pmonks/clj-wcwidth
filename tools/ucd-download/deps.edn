@@ -8,6 +8,10 @@
 ; SPDX-License-Identifier: MPL-2.0
 ;
 
+; Note: this file is primarily here to support REPL-based development of the
+; ucd-download tool.  To run the tool, the :ucd-download alias in the top-level
+; deps.edn file is a better method.
+
 {:deps {com.github.pmonks/urlocal {:mvn/version "RELEASE"}
         com.github.pmonks/spinner {:mvn/version "RELEASE"}
         org.jline/jansi           {:mvn/version "RELEASE"}}}
