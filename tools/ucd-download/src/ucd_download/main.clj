@@ -16,6 +16,7 @@
             [progress.indeterminate :as pi]
             [ucd-download.ucd       :as ucd]))
 
+; Note: don't change these without also updating wcwidth.ucd to match
 (def controls-edn-filename          "ucd-control-ranges.edn")
 (def combining-classes-edn-filename "ucd-combining-class-ranges.edn")
 (def wides-edn-filename             "ucd-wide-ranges.edn")
@@ -59,7 +60,9 @@
     (.write w "\n")
     (pp/pprint data w)))
 
-(defn- download-and-write-files
+(defn download-and-write-files
+  "Downloads and writes the various EDN data files used by clj-wcwidth to the
+  specified `output-directory`."
   [output-directory]
   (let [unicode-version    (ucd/unicode-version)
         now                (java.time.Instant/now)
