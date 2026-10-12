@@ -18,14 +18,14 @@
 ;; UTILITY FNS
 ;;
 
-(defn hex-string->long
+(defn- hex-string->long
   "Turns a hex string (as found in UCD files representing codepoints) into a
   Long."
   ^Long [^CharSequence s]
   (when-not (s/blank? s)
     (Integer/parseInt s 16)))
 
-(defn ^:private download-ucd-data
+(defn- download-ucd-data
   "Downloads and performs basic parsing of any standard text file from the
   [Unicode Character Database](https://unicode.org/Public/UCD/latest/ucd/),
   returning a sequence of vectors containing each field (as a String) in the
@@ -41,7 +41,7 @@
              (map #(vec (s/split % #"\s*;\s*")))  ; Split fields within each line
              doall)))                             ; De-lazy before leaving with-open
 
-(defn ^:private download-ranged-ucd-data
+(defn- download-ranged-ucd-data
   "Retrieves and parses any standard text file from the [Unicode Character Database](https://unicode.org/Public/UCD/latest/ucd/),
   returning a sequence of vectors containing each field (as a String) from the
   file.  Assumes the first field is a codepoint range (as either one or two hex
@@ -205,8 +205,8 @@
            vec))
 
 (defn codepoint-sequence-emoji
-  "Retrieves all codepoint sequence emoji from the UCD.  This includes both
-  'simple' multi-codepoint emoji and ZWJ emoji."
+  "Retrieves all [multi-codepoint sequence emoji from the UCD](https://www.unicode.org/Public/latest/emoji/emoji-sequences.txt).
+  This includes both ZWJ and non-ZWJ multi-codepoint emoji."
   []
   (some->> (concat (map #(when (re-matches #"\p{XDigit}{4,5}(?:\s+\p{XDigit}{4,5})+" (first %))  ; Ignore everything except sequences
                            (let [sq (vec (map hex-string->long (s/split (first %) #"\s+")))]
