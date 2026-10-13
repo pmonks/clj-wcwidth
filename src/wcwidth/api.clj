@@ -91,6 +91,16 @@
     (when code-point
       (ucd/is-control? (int code-point)))))
 
+(defn ascii?
+  "Is `code-point`<sup>†</sup> an [ASCII character](https://en.wikipedia.org/wiki/ASCII)?
+
+  <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
+  of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
+  ^Boolean [code-point]
+  (boolean
+    (when code-point
+      (<= 0 (int code-point) 127))))
+
 (defn combining?
   "Is `code-point`<sup>†</sup> a [combining character](https://en.wikipedia.org/wiki/Combining_character)?
 
@@ -130,6 +140,7 @@
     (cond
       (null?         code-point)  0
       (non-printing? code-point) -1
+      (ascii?        code-point)  1  ; Performance shortcut
       (combining?    code-point)  0
       (wide?         code-point)  2
       :else                       1)
