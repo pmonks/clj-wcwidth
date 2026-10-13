@@ -23,7 +23,7 @@ This library addresses various inconveniences in both POSIX and JLine:
 * The POSIX `wcswidth` function returns `-1` if a string contains any non-printing (control) characters.  In practice this means that Unicode text needs to be pre-processed before being passed to this function.
 * JLine only provides an equivalent of `wcwidth` (the POSIX function that returns the display width of a single code point), but what we think of as a "character" is actually a ["Unicode grapheme cluster"](https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundaries) and critically, [many grapheme clusters (especially emoji) are made up of _multiple_ code points](https://emojipedia.org/emoji-zwj-sequence).
 * Neither POSIX nor JLine take [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) into account, yet these sequences are zero width on an ANSI-capable device.
-* The library [downloads character width rules](https://github.com/pmonks/clj-wcwidth/tree/dev/tools/ucd-download) directly from the [Unicode Character Database](https://www.unicode.org/reports/tr44/), so unlike JLine (which hardcodes these rules in Java), doesn't fall out of date as new Unicode versions are released.
+* The library includes [a tool which downloads character width rules as EDN (data) files](https://github.com/pmonks/clj-wcwidth/tree/dev/tools/ucd-download) directly from the [Unicode Character Database](https://www.unicode.org/reports/tr44/), so unlike JLine (which hardcodes these rules in Java), it's trivial to update as new Unicode versions are released.
 
 ## How does it work?
 
