@@ -17,10 +17,10 @@
             [ucd-download.ucd       :as ucd]))
 
 ; Note: don't change these without also updating wcwidth.ucd to match
-(def controls-edn-filename          "ucd-controls.edn")
-(def combining-classes-edn-filename "ucd-combining-classes.edn")
-(def wides-edn-filename             "ucd-wide-ranges.edn")
-(def emoji-sequences-edn-filename   "ucd-emoji-sequences.edn")
+(def controls-edn-filename          "controls.edn")
+(def combining-classes-edn-filename "combining-classes.edn")
+(def wides-edn-filename             "wide-ranges.edn")
+(def emoji-sequences-edn-filename   "emoji-sequences.edn")
 
 ; Simplified versions of the various east asian width codes, suitable for our purposes
 (def east-asian-width->simple-width {

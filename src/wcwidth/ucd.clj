@@ -20,10 +20,10 @@
   [^CharSequence res]
   (edn/read (java.io.PushbackReader. (io/reader (io/resource res)))))
 
-(def ^:private control-set         (read-edn-from-classpath "ucd-controls.edn"))           ; Set of codepoints (longs)
-(def ^:private combining-class-set (read-edn-from-classpath "ucd-combining-classes.edn"))  ; Set of codepoints (longs)
-(def ^:private wide-ranges         (read-edn-from-classpath "ucd-wide-ranges.edn"))        ; Sequence of ranges, in order
-(def ^:private emoji-sequences-set (read-edn-from-classpath "ucd-emoji-sequences.edn"))    ; Set of sequences of codepoints (longs)
+(def ^:private control-set         (read-edn-from-classpath "ucd/controls.edn"))           ; Set of codepoints (longs)
+(def ^:private combining-class-set (read-edn-from-classpath "ucd/combining-classes.edn"))  ; Set of codepoints (longs)
+(def ^:private wide-ranges         (read-edn-from-classpath "ucd/wide-ranges.edn"))        ; Sequence of ranges, in order
+(def ^:private emoji-sequences-set (read-edn-from-classpath "ucd/emoji-sequences.edn"))    ; Set of sequences of codepoints (longs)
 
 (defn- range-comparator
   "Comparator for a value vs a single range."
