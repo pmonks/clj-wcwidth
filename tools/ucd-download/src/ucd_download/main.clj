@@ -73,13 +73,13 @@
                     now
                     (ucd/ranges->set (ucd/ranges-by-categories general-categories #{:control})))
 
-    ; Generate and write out combining classes codepoint ranges EDN file - 4308 codepoints as of Unicode v18.0.0
+    ; Generate and write out combining classes codepoint ranges EDN file - 4308 codepoints as of Unicode v18.0.0 (~175KB in memory as a set)
     (write-edn-data (io/file output-directory combining-classes-edn-filename)
                     unicode-version
                     now
                     (ucd/ranges->set (ucd/ranges-by-categories general-categories #{:nonspacing-mark :format :surrogate})))
 
-    ; Generate and write out wide (east asian widths and single-codepoint emoji) codepoint ranges EDN file - 183866 codepoints as of Unicode v18.0.0
+    ; Generate and write out wide (east asian widths and single-codepoint emoji) codepoint ranges EDN file - 183866 codepoints as of Unicode v18.0.0, which is too large to put in a set (~7MB)
     (let [east-asian-width-ranges (map first (filter #(= :wide (second %)) (map #(let [[rng width-code] %] [rng (east-asian-width->simple-width width-code)]) (ucd/east-asian-widths))))
           emoji-ranges            (map first (ucd/single-codepoint-emoji))
           all-wides               (ucd/optimise-ranges (sort-by first (concat east-asian-width-ranges emoji-ranges)))]

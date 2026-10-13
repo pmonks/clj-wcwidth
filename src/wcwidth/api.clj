@@ -84,8 +84,8 @@
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
   (boolean
-    (when-let [cp (safe-int code-point)]
-      (= 0x0000 cp))))
+    (when code-point
+      (= 0x0000 (int code-point)))))
 
 (defn non-printing?
   "Is `code-point`<sup>†</sup> a [non-printing (control) character](https://en.wikipedia.org/wiki/Unicode_control_characters)?
@@ -93,7 +93,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/is-control? code-point))
+  (boolean
+    (when code-point
+      (ucd/is-control? (int code-point)))))
 
 (defn combining?
   "Is `code-point`<sup>†</sup> a [combining character](https://en.wikipedia.org/wiki/Combining_character)?
@@ -101,7 +103,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/is-combining-class? code-point))
+  (boolean
+    (when code-point
+      (ucd/is-combining-class? (int code-point)))))
 
 (defn wide?
   "Is `code-point`<sup>†</sup> in the [East Asian Wide (W), East Asian Full-width
@@ -113,7 +117,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/is-wide? code-point))
+  (boolean
+    (when code-point
+      (ucd/is-wide? (int code-point)))))
 
 (defn wcwidth
   "Returns the number of columns needed to represent the `code-point`
@@ -153,8 +159,8 @@
 
 (defn wcswidth
   "Returns the number of columns needed to represent `cs` (a `CharSequence`). If
-  a non-printing code point occurs in `cs`, `-1` is returned (as defined in
-  POSIX).
+  a non-printing (control) code point occurs in `cs`, `-1` is returned (as
+  defined in POSIX).
 
   Returns `0` when `cs` is `nil`."
   ^long [^CharSequence cs]

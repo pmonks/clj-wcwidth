@@ -58,6 +58,13 @@
 ;; PUBLIC UTILITY FNS
 ;;
 
+(defn- make-range
+  "Makes a range tuple from `start` and `end` (longs)."
+  [start end]
+  (if (= start end)
+    [start]
+    [start end]))
+
 (defn optimise-ranges
   "Optimises a sequence of ranges (tuples of 1 or 2 integers), by identifying
   overlapping or contiguous ranges and collapsing them into a single range
@@ -76,10 +83,10 @@
 
         ; Recursive cases
         (<= (first f) (first s) (inc (last f)))  ; Ranges overlap or are contiguous, so combine them and push the combined range back onto r
-          (recur (cons [(first f) (max (last f) (last s))] r) result)
+          (recur (cons (make-range (min (first f) (first s)) (max (last f) (last s))) r) result)
 
         :else  ; Ranges are _not_ contiguous, so add f to the result
-          (recur (cons s r) (conj result f))))))
+          (recur (cons s r) (conj result (make-range (first f) (last f))))))))
 
 (defn ranges-by-categories
   "Filters `general-categories` (data as returned from [[general-categories]])
