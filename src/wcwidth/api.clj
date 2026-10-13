@@ -13,12 +13,6 @@
   (:require [clojure.string :as s]
             [wcwidth.ucd    :as ucd]))
 
-(defmacro ^:private safe-int
-  "nil-safe version of clojure.core/int"
-  [x]
-  `(when ~x
-     (int ~x)))
-
 (defn code-point->string
   "Returns the `String` representation of any Unicode `code-point`<sup>†</sup>,
   or `nil` when `code-point` is `nil`.
@@ -33,9 +27,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^String [code-point]
-  (when-let [cp (safe-int code-point)]
-    (s/join (java.lang.Character/toChars cp))))
-;    (java.lang.Character/toString cp)))  ; Java 11+ only
+  (when code-point
+    (s/join (java.lang.Character/toChars (int code-point)))))
+;    (java.lang.Character/toString (int code-point))))  ; Java 11+ only
 
 (defn code-points->string
   "Returns a `String` made up of all of the given Unicode
@@ -58,8 +52,8 @@
   "Prints `code-point` in normative Unicode notation (`U+codepoint`) to stdout,
   returning `nil`.  This is primarily intended to be a convenience at the REPL."
   [code-point]
-  (when-let [cp (safe-int code-point)]
-    (println (format "U+%04X" cp))))
+  (when code-point
+    (println (format "U+%04X" (int code-point)))))
 
 (defn print-code-points
   "Prints the code points in `cs` (a `CharSequence`) in normative Unicode
@@ -132,23 +126,23 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^long [code-point]
-  (if-let [cp (safe-int code-point)]
+  (if code-point
     (cond
-      (null?         cp)  0
-      (non-printing? cp) -1
-      (combining?    cp)  0
-      (wide?         cp)  2
-      :else               1)
+      (null?         code-point)  0
+      (non-printing? code-point) -1
+      (combining?    code-point)  0
+      (wide?         code-point)  2
+      :else                       1)
     0))
 
 (defn- grapheme-cluster-width
   "Returns the width of the single grapheme cluster identified by `gc` (a
   `CharSequence`)."
   [^CharSequence gc]
-  (when-let [cps (string->code-points gc)]
-    (if (ucd/is-zwj-emoji-sequence? cps)
+  (when-let [code-points (string->code-points gc)]
+    (if (ucd/is-zwj-emoji-sequence? code-points)
       2
-      (min 2 (reduce + (map wcwidth cps))))))
+      (min 2 (reduce + (map wcwidth code-points))))))
 
 (defn- grapheme-cluster-widths
   "Returns a sequence of the widths of the grapheme clusters in `cs` (a
