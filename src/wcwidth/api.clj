@@ -93,7 +93,7 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/in-ranges? ucd/control-ranges code-point))
+  (ucd/is-control? code-point))
 
 (defn combining?
   "Is `code-point`<sup>†</sup> a [combining character](https://en.wikipedia.org/wiki/Combining_character)?
@@ -101,7 +101,7 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/in-ranges? ucd/combining-class-ranges code-point))
+  (ucd/is-combining-class? code-point))
 
 (defn wide?
   "Is `code-point`<sup>†</sup> in the [East Asian Wide (W), East Asian Full-width
@@ -113,14 +113,14 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/in-ranges? ucd/wide-ranges code-point))
+  (ucd/is-wide? code-point))
 
 (defn wcwidth
   "Returns the number of columns needed to represent the `code-point`
   <sup>†</sup>, based on these rules:
 
-  * Printable: `0`, `1`, or `2`
   * Null character, or `nil`: `0`
+  * Printable: `0`, `1`, or `2`
   * Non-printing: `-1`
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
@@ -130,8 +130,8 @@
     (cond
       (null?         cp)  0
       (non-printing? cp) -1
-      (wide?         cp)  2
       (combining?    cp)  0
+      (wide?         cp)  2
       :else               1)
     0))
 
@@ -189,7 +189,7 @@
   not adhering to POSIX.
 
   Returns `0` when `cs` is `nil`."
-  (^Long [^CharSequence cs] (display-width cs nil))
+  (^Long [^CharSequence cs] (display-width cs nil))                            ; Note: cannot use primitive long type hint here, since the function is variadic
   (^Long [^CharSequence cs & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
    (if-let [s (if ignore-ansi? cs (remove-ansi cs))]
      (reduce + (remove neg? (grapheme-cluster-widths s)))

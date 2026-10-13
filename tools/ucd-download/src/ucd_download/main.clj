@@ -17,8 +17,8 @@
             [ucd-download.ucd       :as ucd]))
 
 ; Note: don't change these without also updating wcwidth.ucd to match
-(def controls-edn-filename          "ucd-control-ranges.edn")
-(def combining-classes-edn-filename "ucd-combining-class-ranges.edn")
+(def controls-edn-filename          "ucd-controls.edn")
+(def combining-classes-edn-filename "ucd-combining-classes.edn")
 (def wides-edn-filename             "ucd-wide-ranges.edn")
 (def emoji-sequences-edn-filename   "ucd-emoji-sequences.edn")
 
@@ -67,32 +67,32 @@
   (let [unicode-version    (ucd/unicode-version)
         now                (java.time.Instant/now)
         general-categories (ucd/general-categories)]
-    ; Generate and write out controls codepoint ranges EDN file
+    ; Generate and write out controls codepoint set EDN file (we use a set as it's small - 65 codepoints as of Unicode v18.0.0)
     (write-edn-data (io/file output-directory controls-edn-filename)
                     unicode-version
                     now
-                    (vec (ucd/optimise-ranges (map first (filter #(some #{:control} [(second %)]) general-categories)))))
+                    (ucd/ranges->set (ucd/ranges-by-categories general-categories #{:control})))
 
-    ; Generate and write out combining classes codepoint ranges EDN file
+    ; Generate and write out combining classes codepoint ranges EDN file - 4308 codepoints as of Unicode v18.0.0
     (write-edn-data (io/file output-directory combining-classes-edn-filename)
                     unicode-version
                     now
-                    (vec (ucd/optimise-ranges (map first (filter #(some #{:nonspacing-mark :format :surrogate} [(second %)]) general-categories)))))
+                    (ucd/ranges->set (ucd/ranges-by-categories general-categories #{:nonspacing-mark :format :surrogate})))
 
-    ; Generate and write out wide (east asian widths and single-codepoint emoji) codepoint ranges EDN file
+    ; Generate and write out wide (east asian widths and single-codepoint emoji) codepoint ranges EDN file - 183866 codepoints as of Unicode v18.0.0
     (let [east-asian-width-ranges (map first (filter #(= :wide (second %)) (map #(let [[rng width-code] %] [rng (east-asian-width->simple-width width-code)]) (ucd/east-asian-widths))))
           emoji-ranges            (map first (ucd/single-codepoint-emoji))
-          all-wides               (vec (ucd/optimise-ranges (sort-by first (concat east-asian-width-ranges emoji-ranges))))]
+          all-wides               (ucd/optimise-ranges (sort-by first (concat east-asian-width-ranges emoji-ranges)))]
       (write-edn-data (io/file output-directory wides-edn-filename)
                       unicode-version
                       now
                       all-wides))
 
-    ; Generate and write out multi-codepoint emoji sequences EDN file
+    ; Generate and write out multi-codepoint emoji sequences set EDN file - 2770 sequences as of Unicode v18.0.0
     (write-edn-data (io/file output-directory emoji-sequences-edn-filename)
                     unicode-version
                     now
-                    (set (map first (ucd/codepoint-sequence-emoji))))))  ; Important: these are NOT ranges, so can't be run through optimise-ranges!
+                    (set (map first (ucd/codepoint-sequence-emoji))))))  ; Important: these are NOT ranges!
 
 (defn -main
   "Entry point for the UCD loader CLI tool."

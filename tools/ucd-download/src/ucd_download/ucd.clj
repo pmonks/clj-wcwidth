@@ -15,7 +15,7 @@
             [urlocal.api     :as url]))
 
 ;;
-;; UTILITY FNS
+;; PRIVATE UTILITY FNS
 ;;
 
 (defn- hex-string->long
@@ -53,6 +53,11 @@
                    (cons rng (rest %))))
            (sort-by (comp first first))))
 
+
+;;
+;; PUBLIC UTILITY FNS
+;;
+
 (defn optimise-ranges
   "Optimises a sequence of ranges (tuples of 1 or 2 integers), by identifying
   overlapping or contiguous ranges and collapsing them into a single range
@@ -75,6 +80,24 @@
 
         :else  ; Ranges are _not_ contiguous, so add f to the result
           (recur (cons s r) (conj result f))))))
+
+(defn ranges-by-categories
+  "Filters `general-categories` (data as returned from [[general-categories]])
+  to only include the set of `categories`, and returns an optimised vector of
+  ranges."
+  [general-categories categories]
+  (when (and (seq general-categories) (set? categories))
+    (some->> general-categories
+             (filter #(some categories [(second %)]))
+             (map first)
+             optimise-ranges)))
+
+(defn ranges->set
+  "Turns a sequences of ranges (tuples of 1 or 2 integers) into a set of all
+  values in those ranges, inclusive.  Returns `nil` if ranges is empty."
+  [ranges]
+  (when (seq ranges)
+    (set (mapcat #(range (first %) (inc (last %))) ranges))))
 
 
 ;;
