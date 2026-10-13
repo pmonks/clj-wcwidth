@@ -1,7 +1,11 @@
 # ucd-download
 
-A small command line tool used to retrieve data from the [Unicode Character Database](https://unicode.org/Public/UCD/latest/ucd/),
-precompute it into forms optimised for use by `clj-wcwidth`, and store the result in EDN files in the `resources` directory.
+A small command line tool used to download data from the [Unicode Character Database](https://unicode.org/Public/UCD/latest/ucd/),
+precompute it into forms optimised for use by `clj-wcwidth`, and store the result in EDN files in the `resources` directory, that
+are then used by the main library.
+
+This tool is intended to be run each time a new version of the Unicode specification is released, although the new data won't show
+up until a new version of clj-wcwidth is also released (since these data files are "baked into" the clj-wcwidth JAR file).
 
 ## License
 

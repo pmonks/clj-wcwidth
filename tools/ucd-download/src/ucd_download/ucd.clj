@@ -9,23 +9,23 @@
 ;
 
 (ns ucd-download.ucd
-  "UCD data retrieval."
+  "UCD data download functions."
   (:require [clojure.string  :as s]
             [clojure.java.io :as io]
             [urlocal.api     :as url]))
 
 ;;
-;; UTILITY FNS
+;; PRIVATE UTILITY FNS
 ;;
 
-(defn hex-string->long
+(defn- hex-string->long
   "Turns a hex string (as found in UCD files representing codepoints) into a
   Long."
   ^Long [^CharSequence s]
   (when-not (s/blank? s)
     (Integer/parseInt s 16)))
 
-(defn ^:private download-ucd-data
+(defn- download-ucd-data
   "Downloads and performs basic parsing of any standard text file from the
   [Unicode Character Database](https://unicode.org/Public/UCD/latest/ucd/),
   returning a sequence of vectors containing each field (as a String) in the
@@ -41,7 +41,7 @@
              (map #(vec (s/split % #"\s*;\s*")))  ; Split fields within each line
              doall)))                             ; De-lazy before leaving with-open
 
-(defn ^:private download-ranged-ucd-data
+(defn- download-ranged-ucd-data
   "Retrieves and parses any standard text file from the [Unicode Character Database](https://unicode.org/Public/UCD/latest/ucd/),
   returning a sequence of vectors containing each field (as a String) from the
   file.  Assumes the first field is a codepoint range (as either one or two hex
@@ -52,6 +52,18 @@
            (map #(let [rng (vec (map hex-string->long (s/split (first %) #"\.\.")))]  ; Split first field into its range end-members, then convert each of them to a long
                    (cons rng (rest %))))
            (sort-by (comp first first))))
+
+
+;;
+;; PUBLIC UTILITY FNS
+;;
+
+(defn- make-range
+  "Makes a range tuple from `start` and `end` (longs)."
+  [start end]
+  (if (= start end)
+    [start]
+    [start end]))
 
 (defn optimise-ranges
   "Optimises a sequence of ranges (tuples of 1 or 2 integers), by identifying
@@ -71,10 +83,28 @@
 
         ; Recursive cases
         (<= (first f) (first s) (inc (last f)))  ; Ranges overlap or are contiguous, so combine them and push the combined range back onto r
-          (recur (cons [(first f) (max (last f) (last s))] r) result)
+          (recur (cons (make-range (min (first f) (first s)) (max (last f) (last s))) r) result)
 
         :else  ; Ranges are _not_ contiguous, so add f to the result
-          (recur (cons s r) (conj result f))))))
+          (recur (cons s r) (conj result (make-range (first f) (last f))))))))
+
+(defn ranges-by-categories
+  "Filters `general-categories` (data as returned from [[general-categories]])
+  to only include the set of `categories`, and returns an optimised vector of
+  ranges."
+  [general-categories categories]
+  (when (and (seq general-categories) (set? categories))
+    (some->> general-categories
+             (filter #(some categories [(second %)]))
+             (map first)
+             optimise-ranges)))
+
+(defn ranges->set
+  "Turns a sequences of ranges (tuples of 1 or 2 integers) into a set of all
+  values in those ranges, inclusive.  Returns `nil` if ranges is empty."
+  [ranges]
+  (when (seq ranges)
+    (set (mapcat #(range (first %) (inc (last %))) ranges))))
 
 
 ;;
@@ -205,8 +235,8 @@
            vec))
 
 (defn codepoint-sequence-emoji
-  "Retrieves all codepoint sequence emoji from the UCD.  This includes both
-  'simple' multi-codepoint emoji and ZWJ emoji."
+  "Retrieves all [multi-codepoint sequence emoji from the UCD](https://www.unicode.org/Public/latest/emoji/emoji-sequences.txt).
+  This includes both ZWJ and non-ZWJ multi-codepoint emoji."
   []
   (some->> (concat (map #(when (re-matches #"\p{XDigit}{4,5}(?:\s+\p{XDigit}{4,5})+" (first %))  ; Ignore everything except sequences
                            (let [sq (vec (map hex-string->long (s/split (first %) #"\s+")))]

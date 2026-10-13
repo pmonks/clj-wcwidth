@@ -20,10 +20,10 @@
   [^CharSequence res]
   (edn/read (java.io.PushbackReader. (io/reader (io/resource res)))))
 
-(def combining-class-ranges (read-edn-from-classpath "ucd-combining-class-ranges.edn"))  ; Sequence of ranges, in order
-(def control-ranges         (read-edn-from-classpath "ucd-control-ranges.edn"))          ; Sequence of ranges, in order
-(def wide-ranges            (read-edn-from-classpath "ucd-wide-ranges.edn"))             ; Sequence of ranges, in order
-(def emoji-sequences-set    (read-edn-from-classpath "ucd-emoji-sequences.edn"))         ; Set
+(def ^:private control-set         (read-edn-from-classpath "ucd-controls.edn"))           ; Set of codepoints (longs)
+(def ^:private combining-class-set (read-edn-from-classpath "ucd-combining-classes.edn"))  ; Set of codepoints (longs)
+(def ^:private wide-ranges         (read-edn-from-classpath "ucd-wide-ranges.edn"))        ; Sequence of ranges, in order
+(def ^:private emoji-sequences-set (read-edn-from-classpath "ucd-emoji-sequences.edn"))    ; Set of sequences of codepoints (longs)
 
 (defn- range-comparator
   "Comparator for a value vs a single range."
@@ -44,12 +44,24 @@
     [1 2] (range-comparator (first a) b)
     [2 1] (* -1 (range-comparator (first b) a))))
 
-(defn in-ranges?
+(defn- in-ranges?
   "Is the given code-point in any of the given ranges?"
   ^Boolean [ranges code-point]
   (boolean
     (when code-point
       (>= (java.util.Collections/binarySearch ranges [(int code-point)] ranges-comparator) 0))))
+
+(def is-control?
+  "Is the given codepoint a control 'character'?"
+  (partial contains? control-set))
+
+(def is-combining-class?
+  "Is the given codepoint a combining class 'character'?"
+  (partial contains? combining-class-set))
+
+(def is-wide?
+  "Is the given codepoint wide?"
+  (partial in-ranges? wide-ranges))
 
 (def is-zwj-emoji-sequence?
   "Is the given sequence of codepoints a ZWJ emoji?"

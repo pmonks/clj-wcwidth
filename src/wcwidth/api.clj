@@ -13,12 +13,6 @@
   (:require [clojure.string :as s]
             [wcwidth.ucd    :as ucd]))
 
-(defmacro ^:private safe-int
-  "nil-safe version of clojure.core/int"
-  [x]
-  `(when ~x
-     (int ~x)))
-
 (defn code-point->string
   "Returns the `String` representation of any Unicode `code-point`<sup>†</sup>,
   or `nil` when `code-point` is `nil`.
@@ -33,9 +27,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^String [code-point]
-  (when-let [cp (safe-int code-point)]
-    (s/join (java.lang.Character/toChars cp))))
-;    (java.lang.Character/toString cp)))  ; Java 11+ only
+  (when code-point
+    (s/join (java.lang.Character/toChars (int code-point)))))
+;    (java.lang.Character/toString (int code-point))))  ; Java 11+ only
 
 (defn code-points->string
   "Returns a `String` made up of all of the given Unicode
@@ -58,8 +52,8 @@
   "Prints `code-point` in normative Unicode notation (`U+codepoint`) to stdout,
   returning `nil`.  This is primarily intended to be a convenience at the REPL."
   [code-point]
-  (when-let [cp (safe-int code-point)]
-    (println (format "U+%04X" cp))))
+  (when code-point
+    (println (format "U+%04X" (int code-point)))))
 
 (defn print-code-points
   "Prints the code points in `cs` (a `CharSequence`) in normative Unicode
@@ -84,8 +78,8 @@
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
   (boolean
-    (when-let [cp (safe-int code-point)]
-      (= 0x0000 cp))))
+    (when code-point
+      (= 0x0000 (int code-point)))))
 
 (defn non-printing?
   "Is `code-point`<sup>†</sup> a [non-printing (control) character](https://en.wikipedia.org/wiki/Unicode_control_characters)?
@@ -93,7 +87,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/in-ranges? ucd/control-ranges code-point))
+  (boolean
+    (when code-point
+      (ucd/is-control? (int code-point)))))
 
 (defn combining?
   "Is `code-point`<sup>†</sup> a [combining character](https://en.wikipedia.org/wiki/Combining_character)?
@@ -101,7 +97,9 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/in-ranges? ucd/combining-class-ranges code-point))
+  (boolean
+    (when code-point
+      (ucd/is-combining-class? (int code-point)))))
 
 (defn wide?
   "Is `code-point`<sup>†</sup> in the [East Asian Wide (W), East Asian Full-width
@@ -113,36 +111,38 @@
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^Boolean [code-point]
-  (ucd/in-ranges? ucd/wide-ranges code-point))
+  (boolean
+    (when code-point
+      (ucd/is-wide? (int code-point)))))
 
 (defn wcwidth
   "Returns the number of columns needed to represent the `code-point`
   <sup>†</sup>, based on these rules:
 
-  * Printable: `0`, `1`, or `2`
   * Null character, or `nil`: `0`
+  * Printable: `0`, `1`, or `2`
   * Non-printing: `-1`
 
   <sup>†</sup>a `char` or `int`, but `int` is usually the better choice, because
   of [historical limitations with Java's `char` type](https://www.oracle.com/technical-resources/articles/javase/supplementary.html)"
   ^long [code-point]
-  (if-let [cp (safe-int code-point)]
+  (if code-point
     (cond
-      (null?         cp)  0
-      (non-printing? cp) -1
-      (wide?         cp)  2
-      (combining?    cp)  0
-      :else               1)
+      (null?         code-point)  0
+      (non-printing? code-point) -1
+      (combining?    code-point)  0
+      (wide?         code-point)  2
+      :else                       1)
     0))
 
 (defn- grapheme-cluster-width
   "Returns the width of the single grapheme cluster identified by `gc` (a
   `CharSequence`)."
   [^CharSequence gc]
-  (when-let [cps (string->code-points gc)]
-    (if (ucd/is-zwj-emoji-sequence? cps)
+  (when-let [code-points (string->code-points gc)]
+    (if (ucd/is-zwj-emoji-sequence? code-points)
       2
-      (min 2 (reduce + (map wcwidth cps))))))
+      (min 2 (reduce + (map wcwidth code-points))))))
 
 (defn- grapheme-cluster-widths
   "Returns a sequence of the widths of the grapheme clusters in `cs` (a
@@ -153,8 +153,8 @@
 
 (defn wcswidth
   "Returns the number of columns needed to represent `cs` (a `CharSequence`). If
-  a non-printing code point occurs in `cs`, `-1` is returned (as defined in
-  POSIX).
+  a non-printing (control) code point occurs in `cs`, `-1` is returned (as
+  defined in POSIX).
 
   Returns `0` when `cs` is `nil`."
   ^long [^CharSequence cs]
@@ -189,7 +189,7 @@
   not adhering to POSIX.
 
   Returns `0` when `cs` is `nil`."
-  (^Long [^CharSequence cs] (display-width cs nil))
+  (^Long [^CharSequence cs] (display-width cs nil))                            ; Note: cannot use primitive long type hint here, since the function is variadic
   (^Long [^CharSequence cs & {:keys [ignore-ansi?] :or {ignore-ansi? false}}]
    (if-let [s (if ignore-ansi? cs (remove-ansi cs))]
      (reduce + (remove neg? (grapheme-cluster-widths s)))
