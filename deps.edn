@@ -19,4 +19,4 @@
                     :deps       {com.github.pmonks/urlocal {:mvn/version "RELEASE"}
                                  com.github.pmonks/spinner {:mvn/version "RELEASE"}
                                  org.jline/jansi           {:mvn/version "RELEASE"}}
-                    :main-opts ["-m" "ucd-download.main" "resources/ucd"]}}}
+                    :main-opts ["-m" "ucd-download.main" "resources/wcwidth/ucd"]}}}
