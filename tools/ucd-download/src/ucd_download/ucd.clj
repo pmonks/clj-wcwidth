@@ -53,17 +53,17 @@
                    (cons rng (rest %))))
            (sort-by (comp first first))))
 
-
-;;
-;; PUBLIC UTILITY FNS
-;;
-
 (defn- make-range
   "Makes a range tuple from `start` and `end` (longs)."
   [start end]
   (if (= start end)
     [start]
     [start end]))
+
+
+;;
+;; PUBLIC UTILITY FNS
+;;
 
 (defn optimise-ranges
   "Optimises a sequence of ranges (tuples of 1 or 2 integers), by identifying
@@ -85,7 +85,7 @@
         (<= (first f) (first s) (inc (last f)))  ; Ranges overlap or are contiguous, so combine them and push the combined range back onto r
           (recur (cons (make-range (min (first f) (first s)) (max (last f) (last s))) r) result)
 
-        :else  ; Ranges are _not_ contiguous, so add f to the result
+        :else  ; Ranges are _not_ contiguous, so add f to the result - we use make-range here to collapse single element ranges (e.g. [37 37] -> [37])
           (recur (cons s r) (conj result (make-range (first f) (last f))))))))
 
 (defn ranges-by-categories
