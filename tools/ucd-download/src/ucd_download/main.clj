@@ -49,7 +49,7 @@
 
 (defn write-edn-data
   "Writes `data` (pretty printed) to EDN file `f`, with a comment at the top
-  containing the generation date and the `unicode-version`."
+  containing the `unicode-version` and `now`."
   [f unicode-version now data]
   (with-open [w (io/writer (io/file f))]
     (.write w "; GENERATED FILE, DO NOT EDIT!\n")
