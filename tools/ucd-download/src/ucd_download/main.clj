@@ -53,12 +53,9 @@
   [f unicode-version now data]
   (with-open [w (io/writer (io/file f))]
     (.write w "; GENERATED FILE, DO NOT EDIT!\n")
-    (.write w "; Generated from Unicode v")
-    (.write w unicode-version)
-    (.write w " at ")
-    (.write w (str now))
-    (.write w "\n")
-    (pp/pprint data w)))
+    (.write w (str "; Generated from Unicode v" unicode-version " at " now "\n"))
+    (pp/pprint data w)
+    (.flush w)))
 
 (defn download-and-write-files
   "Downloads and writes the various EDN data files used by clj-wcwidth to the
